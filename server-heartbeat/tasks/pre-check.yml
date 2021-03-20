@@ -1,0 +1,155 @@
+---
+- name: initialize prechecks
+  block:
+    - name: begin precheck
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        content:  "######################################## TAKING PRECHECK LOGS ########################################################.stdout###"
+  tags:
+    - pre
+- name: verify hostname
+  block:
+    - name: read hostname
+      shell: hostname
+      register: hostname
+    - name: write hostname
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/hostname-pre"
+        content: "{{ hostname.stdout }}"
+  tags:
+    - pre
+- name: distribution info
+  block:
+    - name: get uname output
+      shell: uname -r
+      register: uname
+    - name: dump uname output
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/uname-pre"
+        content: "{{ uname.stdout }}"
+  tags:
+    - pre
+- name: check routes info
+  block:
+    - name: grab routes
+      shell: "route -n | sort"
+      register: route
+    - name: log routes info
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/route-pre"
+        content: "{{ route.stdout }}"
+  tags:
+    - pre
+- name: Find the disk utilization
+  block:
+    - name: get df output
+      shell: "df -hP | awk '{print $1 \" \" $6}' | sort"
+      register: df
+    - name: dump df output
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/df-pre"
+        content: "{{ df.stdout }}"
+  tags:
+    - pre
+- name: get sysconfig networking info
+  block:
+    - name: read network cfg file
+      shell:  "cat /etc/sysconfig/network"
+      register: syscfg_net
+    - name: write syscfg network data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/sys-network-pre"
+        content: "{{ syscfg_net.stdout }}"
+  tags:
+    - pre
+- name: retrieve mounts info
+  block:
+    - name: get mount output
+      shell: "mount -l | sort"
+      register: mounts
+    - name: dump mounts info
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/mount-l-pre"
+        content: "{{ mounts.stdout }}"
+  tags:
+    - pre
+- name: get fdisks info
+  block:
+    - name: get fdisk output
+      shell: "fdisk -l"
+      register: fdisk
+    - name: write fdisk output
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/fdisk-l-pre"
+        content: "{{ fdisk.stdout }}"
+  tags:
+    - pre
+- name: retrieve lsblk info
+  block:
+    - name: get lsblk output
+      shell: "lsblk"
+      register: lsblk
+    - name: dump lsblk output
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lsblk-pre"
+        content: "{{ lsblk.stdout }}"
+  tags:
+    - pre
+- name: retrieve lvs info
+  block:
+    - name: get lvs output
+      shell: "lvs | sort"
+      register: lvs
+    - name: write lvs info
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lvs-pre"
+        content: "{{ lvs.stdout }}"
+  tags:
+    - pre
+- name: read iptables service status
+  block:
+    - name: get sysctl iptables services status
+      shell: "service iptables status"
+      ignore_errors: true
+      register: iptables
+    - name: write iptables service status
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/iptables-pre"
+        content: "{{ iptables.stdout }}"
+  tags:
+    - pre
+- name: read firewalld service status
+  block:
+    - name: get iptables sysctl status
+      shell: "service firewalld status"
+      ignore_errors: true
+      register: firewalld
+    - name: write firewlld service status
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/firewall-pre"
+        content: "{{ firewalld.stdout }}"
+  tags:
+    - pre
+- name: read sssd service status
+  block:
+    - name: get sysctl sssd service status
+      shell: "systemctl status sssd | grep -i active"
+      ignore_errors: true
+      register: sssd
+    - name: write sysctl sssd service status
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/sssd-pre"
+        content: "{{ sssd.stdout }}"
+  tags:
+    - pre
+- name: get internet interfaces info
+  block:
+    - name: retrieve ip addr output
+      shell: "ip addr | awk '/^[0-9]+:/ {sub(/:/,\"\",$2); iface=$2 } /^[[:space:]]*inet / {split($2, a, \"/\"); print iface\" : \"a[1]}' | sort"
+      register: ipa
+    - name: dump ip addr info
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/ips-pre"
+        content: "{{ ipa.stdout }}"
+  tags:
+    - pre

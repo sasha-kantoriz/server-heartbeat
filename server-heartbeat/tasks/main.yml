@@ -1,0 +1,10 @@
+---
+# tasks file for server-heartbeat
+- import_tasks: setup.yml
+- import_tasks: pre-check.yml
+- import_tasks: patching.yml
+- import_tasks: post-check.yml
+- import_tasks: logs.yml
+- import_tasks: collect.yml
+
+

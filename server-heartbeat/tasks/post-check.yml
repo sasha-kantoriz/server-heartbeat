@@ -1,0 +1,164 @@
+---
+- name: initialize post checks
+  copy:
+    dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/post-log"
+    content: "############################## TAKING POSTCHECK  LOGS & COMPARING WITH PRECHECK  ########################################"
+  tags:
+    - post
+- name: verify hostname
+  block:
+    - name: read hostname
+      shell: "hostname"
+      register: hostname_post
+    - name: log hostname
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/hostname-post"
+        content: "{{ hostname_post.stdout }}"
+  tags:
+    - post
+- name: get uname output
+  block:
+    - name: retrieve dist data
+      shell: "uname -r"
+      register: uname_post
+    - name: copy uname output
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/uname-post"
+        content: "{{ uname_post.stdout }}"
+  tags:
+    - post
+- name: read syscfg network file
+  block:
+    - name: get network syscfg
+      shell: "cat /etc/sysconfig/network"
+      register: syscfg_net_post
+    - name: backup syscfg network file
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sys-network-post"
+        content: "{{ syscfg_net_post.stdout }}"
+  tags:
+    - post
+- name: retrieve routes info
+  block:
+    - name: get route output
+      shell: "route -n | sort"
+      register: routes_post
+    - name: log routes data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/route-post"
+        content: "{{ routes_post.stdout }}"
+  tags:
+    - post
+- name: read mounts info
+  block:
+    - name: get mount cmd output
+      shell: "mount -l | sort"
+      register: mounts_post
+    - name: write mounts info
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/mount-l-post"
+        content: "{{ mounts_post.stdout }}"
+  tags:
+    - post
+- name: list filesystems disks
+  block:
+    - name: read df output
+      shell: "df -hP | awk '{print $1 \" \" $6}' | sort"
+      register: df_post
+    - name: dump fs disks info
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/df-post"
+        content: "{{ df_post.stdout }}"
+  tags:
+    - post
+- name: retrieve fdisk output
+  block:
+    - name: get partitions info
+      shell: "fdisk -l"
+      register: fdisk_post
+    - name: write fdisk info
+      copy:
+        dest: '{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/fdisk-l-post'
+        content: "{{ fdisk_post }}"
+  tags:
+    - post
+- name: get lsblk info
+  block:
+    - name: fetch block devices data
+      shell: "lsblk"
+      register: lsblk_post
+    - name: dump block devices data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/lsblk-post"
+        content: "{{ lsblk_post.stdout }}"
+  tags:
+    - post
+- name:
+  block:
+    - name: read lv cmd output
+      shell: "lvs | sort "
+      register: lvs_post
+    - name: write lvs command output
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/lvs-post"
+        content: "{{ lvs_post.stdout }}"
+  tags:
+    - post
+- name: see itables systemctl services status
+  block:
+    - name: check iptables service enablence\\
+      shell: "service iptables status"
+      ignore_errors: true
+      register: iptables_post
+    - name: read/write iptables>
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/iptables-post"
+        content: "{{ iptables_post.stdout }}"
+  tags:
+    - post
+- name: grab firewalld service status
+  block:
+    - name: check status firewalld service
+      shell: "service firewalld status"
+      ignore_errors: true
+      register: firewalld_post
+    - name: write firewalld service status
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/firewall-post"
+        content: "{{ firewalld_post.stdout }}"
+  tags:
+    - post
+- name: fetch sssd systemctl status service
+  block:
+    - name: get sssd service status
+      shell: 'systemctl status sssd | grep -i active'
+      ignore_errors: true
+      register: sssd_post
+    - name: write sssd service status
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sssd-post"
+        content: "{{ sssd_post.stdout }}"
+  tags:
+    - post
+- name: retrieve Memory/CPU info
+  block:
+    - name: read CPU data
+      shell: "echo -e  \"Total CPU: `cat /proc/cpuinfo  | grep \"processor\" | wc -l` Memory: `cat /proc/meminfo | grep -i memtotal | awk '{print $2}'` kb before recycle\""
+      register: cpu_post
+    - name: dump CPU data
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/post-log"
+        line: "{{ cpu_post.stdout }}"
+  tags:
+    - post
+- name: get internet interfaces info
+  block:
+    - name: retrieve ip addr output
+      shell: "ip addr | awk '/^[0-9]+:/ { sub(/:/,\"\",$2); iface=$2 } /^[[:space:]]*inet / { split($2, a, \"/\"); print iface\" : \"a[1] }' | sort"
+      register: ipa_post
+    - name: dump ip addr info
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/ips-post"
+        content: "{{ ipa_post.stdout }}"
+  tags:
+    - post

@@ -1,0 +1,5 @@
+---
+# vars file for server-heartbeat
+ansible_server_logs_path: ~/logs-servers
+remote_logs_path: /root/logs-server
+

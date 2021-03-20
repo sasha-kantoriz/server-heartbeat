@@ -1,0 +1,72 @@
+---
+- name: Archieve remote logs
+  archive:
+    path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}"
+    dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}-{{ ansible_date_time.iso8601 }}.tar.gz"
+  tags:
+    - fetch
+    - archive
+- name: List remote logs tarballs
+  find:
+    path: "{{ remote_logs_path }}"
+    patterns: "*.tar.gz"
+  register: logs_tarballs
+  tags:
+    - fetch
+- name: List all local previous logs tarballs
+  find:
+    path: "{{ ansible_server_logs_path }}"
+    patterns: "*.tar.gz"
+  register: prev_logs
+  delegate_to: localhost
+  tags:
+    - fetch
+    - clear
+- name: Download logs
+  fetch:
+    src: "{{ item.path }}"
+    dest: "{{ ansible_server_logs_path }}/"
+    flat: yes
+  with_items: "{{ logs_tarballs.files }}"
+  tags:
+    - fetch
+- name: Move previous logs tarballs
+  command: "mv {{ item.path }} {{ ansible_server_logs_path }}/prev/"
+  with_items: "{{ prev_logs.files }}"
+  delegate_to: localhost
+  tags:
+    - fetch
+    - clear
+- name: List all local logs tarballs
+  find:
+    path: "{{ ansible_server_logs_path }}"
+    patterns: "*.tar.gz"
+  register: logs
+  delegate_to: localhost
+  tags:
+    - fetch
+    - unarchive
+- name: Unarchive logs tarballs
+  unarchive:
+    src: "{{ item.path }}"
+    dest: "{{ ansible_server_logs_path }}"
+  with_items: "{{ logs.files }}"
+  delegate_to: localhost
+  tags:
+    - fetch
+    - unarchive
+- name: Clear remote tarballs
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ logs_tarballs.files }}"
+  tags:
+    - fetch
+    - clear
+- name: Clear prev logs papka
+  file:
+    path: "{{ ansible_server_logs_path }}/prev"
+    state: absent
+  delegate_to: localhost
+  tags:
+    - cleanup

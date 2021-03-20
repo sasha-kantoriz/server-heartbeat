@@ -1,0 +1,145 @@
+---
+### LOGS ###
+- name: get timestamp
+  block:
+    - name: retrieve timestamp
+      shell: "echo -e  \"Date is `date | awk '{print $3 \" \" $2 \" \" $6}'` and time is `date | awk '{print $4}'`\""
+      register: timestamp
+    - name: write timestamp
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "{{ timestamp.stdout }}"
+- name: get uptime data
+  block:
+    - name: retrieve uptime info
+      shell: "echo -e   \"Uptime is `uptime | awk '{print $3 \" \" $4}'`\""
+      register: uptime
+    - name: write uptime info
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "{{ uptime.stdout }}"
+- name: mounted FS data
+  block:
+    - name: retrive df file systems data output
+      shell: "echo -e  \"Total `df -hP | awk '{print $1 \" \" $6}' | sort | wc -l` FS are mounted\""
+      register: df
+    - name: write df output
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "{{ df.stdout }}"
+- name: retrieve CPU info
+  block:
+    - name: read CPU data
+      shell: "echo -e  \"Total CPU: `cat /proc/cpuinfo  | grep \"processor\" | wc -l` Memory: `cat /proc/meminfo | grep -i memtotal | awk '{print $2}'` kb before recycle\""
+      register: cpu
+    - name: dump CPU data
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "{{ cpu.stdout }}"
+- name:  log ifcfg network scripts
+  block:
+    - name: read ifcfg network scripts
+      shell: "cat /etc/sysconfig/network-scripts/ifcfg-*"
+      register: ifcfg_net_scripts
+    - name: write ufcfg network scripts
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/network-scripts"
+        content: "{{ ifcfg_net_scripts.stdout }}"
+    - name: write backup msg to log file
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "Backup of Netowrk scrips saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/network-scripts"
+- name: backup /etc/hosts file
+  block:
+    - name: read /etc/hosts file
+      shell: "cat /etc/hosts"
+      register: hosts
+    - name: write /etc/hosts backup
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/hosts"
+        content: "{{ hosts.stdout }}"
+    - name: write /etc/hosts backup msg
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "Backup of host file saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/hosts"
+- name: retrieve fstab data
+  block:
+    - name: read /etc/fstab data
+      shell: "cat /etc/fstab"
+      register: fstab
+    - name: write /etc/fstab backup
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/fstab"
+        content: "{{ fstab.stdout }}"
+    - name: write /etc/fstab backup msg
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "Backup of fstab file saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/fstab"
+- name: retrieve lvsdisplay data
+  block:
+    - name: get lvsdisplay output
+      shell: "lvdisplay"
+      register: lvsdisplay
+    - name: dump lvsdisplay output
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lvdisplay"
+        content: "lvsdsiplay.stdout"
+    - name: write blvsdisplay backup msg
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "Backup of lvdisplay  saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lvdisplay"
+- name: get ifconfig data
+  block:
+    - name: retrieve ifconfig output
+      shell: "ifconfig -a"
+      register: ifcfg
+    - name: write ifconfig data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/ifconfig"
+        content: "Backup of ifconfig -a saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/ifconfig"
+    - name: write ifconfig backup message
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "Backup of ifconfig -a saved at /root/pre-post/ifconfig"
+- name: list java processes
+  block:
+    - name: check Java processes
+      shell: "ps -ef | grep java | grep -v \"grep\" | awk NR==1'{print $1}'"
+      register: crit_processes
+    - name: dump critical java processes to log
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line:     "Some critical proccess are running in background. Check ps -ef"
+      when: "{{ crit_processes.stdout_lines|length!=0 }}"
+- name: list warnings and errors /var/log/messages
+  block:
+    - name: read /var/log/messages
+      shell:  "cat /var/log/messages | sed -n -e '/error/p' -e'/warn/p'  | awk NR==1'{print $1}'"
+      ignore_errors: true
+      register: log_messages_events_error
+    - name: count /var/log/messages errors and warnings
+      shell: "cat /var/log/messages | sed -n -e '/error/p' -e'/warn/p'|wc -l"
+      ignore_errors: true
+      register: var_log_errors_and_warnings_num
+    - name: write crtitical alerts log message
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "{{ var_log_errors_and_warnings_num }} critical error/warning messages found."
+- name: read dmesg errors and warnings
+  block:
+    - name: verify errors/warnings presence in /var/log/dmesg
+      shell: "cat /var/log/dmesg | sed -n -e '/error/p' -e'/warn/p'  | awk NR==1'{print $1}'"
+      register: log_dmesg_crit_events
+    - name: log critical alerts
+      blockinfile:
+        block: "{{ '\n'.join(log_dmesg_crit_events.stdout_lines) }}"
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+    - name: log absence critical alerts
+      lineinfile:
+        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+        line: "No critical alerts found in /var/log/dmesg"
+      when: log_dmesg_crit_events.stdout_lines|length==0
+- name: write logs collection finished
+  lineinfile:
+    path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+    line: "###################################### PRECHECK LOGS COLLECTED  #########################################################"

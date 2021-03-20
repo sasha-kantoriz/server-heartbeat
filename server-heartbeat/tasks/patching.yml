@@ -1,0 +1,21 @@
+---
+- name: get package manager repos
+  shell: "yum repolist"
+  register: yum_repos
+  tags:
+    - patching
+- set_fact:
+    startreposid: "{{ yum_repos.stdout_lines|select('match', 'repo id*')|list|first }}"
+  tags:
+    - patching
+- set_fact:
+    listrepos: "{{ yum_repos.stdout_lines[yum_repos.stdout_lines.index(startreposid)+1:-1] }}"
+  tags:
+    - patching
+- name: disable package manager repos
+  yum:
+    disablerepo: "{{ item.split('/')[0] }}"
+  ignore_errors: true
+  with_items: "{{listrepos}}"
+  tags:
+    - patching
