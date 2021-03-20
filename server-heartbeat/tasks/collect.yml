@@ -1,4 +1,11 @@
 ---
+- name: List previous remote logs tarballs
+  find:
+    path: "{{ remote_logs_path }}"
+    patterns: "*.tar.gz"
+  register: prev_logs_tarballs
+  tags:
+    - cleanup
 - name: Archieve remote logs
   archive:
     path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}"
@@ -63,10 +70,17 @@
   tags:
     - fetch
     - clear
-- name: Clear prev logs papka
+- name: Clear prev logs folder
   file:
     path: "{{ ansible_server_logs_path }}/prev"
     state: absent
   delegate_to: localhost
+  tags:
+    - cleanup
+- name: Clear prev remote logs
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ prev_logs_tarballs.files }}"
   tags:
     - cleanup
