@@ -124,7 +124,7 @@
     - name: write crtitical alerts log message
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ var_log_errors_and_warnings_num }} critical error/warning messages found."
+        line: "{{ var_log_errors_and_warnings_num.stdout }} critical error/warning messages found."
 - name: read dmesg errors and warnings
   block:
     - name: verify errors/warnings presence in /var/log/dmesg
@@ -134,6 +134,7 @@
       blockinfile:
         block: "{{ '\n'.join(log_dmesg_crit_events.stdout_lines) }}"
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+      when: log_dmesg_crit_events.stdout_lines|length!=0
     - name: log absence critical alerts
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
