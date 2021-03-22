@@ -1,0 +1,37 @@
+---
+- name: set host/timestamp
+  set_fact:
+    prefix: "{{ ansible_ssh_host }}-{{ ansible_date_time.iso8601}}"
+  tags:
+    - csv
+- name: Dump PRE stage logs CSV
+  copy:
+    dest: "{{ remote_logs_path }}/{{ prefix }}-pre.csv"
+    content: "{{ ','.join(results_pre.keys()|list) }}\n{{ ','.join(results_pre.values()|map('string')|list) }}"
+  tags:
+    - csv
+- name: Dump POST stage logs CSV
+  copy:
+    dest: "{{ remote_logs_path }}/{{ prefix }}-post.csv"
+    content: "{{ ','.join(results_post.keys()|list) }}\n{{ ','.join(results_post.values()|map('string')|list) }}"
+  tags:
+    - csv
+- name: Dump logs CSV
+  copy:
+    dest: "{{ remote_logs_path }}/{{ prefix }}-logs.csv"
+    content: "{{ ','.join(results_logs.keys()|list) }}\n{{ ','.join(results_logs.values()|map('string')|list) }}"
+  tags:
+    - csv
+
+#  delegate_to: localhost
+
+- name: Download CSV logs
+  fetch:
+    src: "{{ item }}"
+    dest: "{{ ansible_server_logs_path }}/"
+  with_items:
+      - "{{ remote_logs_path }}/{{ prefix }}-pre.csv"
+      - "{{ remote_logs_path }}/{{ prefix }}-post.csv"
+      - "{{ remote_logs_path }}/{{ prefix }}-logs.csv"
+  tags:
+    - csv

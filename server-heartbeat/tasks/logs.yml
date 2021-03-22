@@ -5,6 +5,9 @@
     - name: retrieve timestamp
       shell: "echo -e  \"Date is `date | awk '{print $3 \" \" $2 \" \" $6}'` and time is `date | awk '{print $4}'`\""
       register: timestamp
+    - name: set fact timestamp
+      set_fact:
+        results_logs: "{{ results_logs|combine({'timestamp': '\n'.join(timestamp.stdout_lines)\}) }}"
     - name: write timestamp
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
@@ -14,6 +17,9 @@
     - name: retrieve uptime info
       shell: "echo -e   \"Uptime is `uptime | awk '{print $3 \" \" $4}'`\""
       register: uptime
+    - name: set fact uptime
+      set_fact:
+        results_logs: "{{ results_logs|combine({'uptime': '\n'.join(uptime.stdout_lines)}) }}"
     - name: write uptime info
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
@@ -22,25 +28,35 @@
   block:
     - name: retrive df file systems data output
       shell: "echo -e  \"Total `df -hP | awk '{print $1 \" \" $6}' | sort | wc -l` FS are mounted\""
-      register: df
+      register: df_total
+    - name: set fact df
+      set_fact:
+        results_logs: "{{ results_logs|combine({'df-total': '\n'.join(df_total.stdout_lines)}) }}"
     - name: write df output
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ df.stdout }}"
-- name: retrieve CPU info
+        line: "{{ df_total.stdout }}"
+- name: retrieve Mem/CPU info
   block:
-    - name: read CPU data
+    - name: read Mem/CPU data
       shell: "echo -e  \"Total CPU: `cat /proc/cpuinfo  | grep \"processor\" | wc -l` Memory: `cat /proc/meminfo | grep -i memtotal | awk '{print $2}'` kb before recycle\""
-      register: cpu
+      register: cpu_total
+    - name: set fact cpu
+      set_fact:
+        results_logs: "{{ results_logs|combine({'cpu-total': '\n'.join(cpu_total.stdout_lines)}) }}"
     - name: dump CPU data
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ cpu.stdout }}"
+        line: "{{ cpu_total.stdout }}"
 - name:  log ifcfg network scripts
   block:
     - name: read ifcfg network scripts
       shell: "cat /etc/sysconfig/network-scripts/ifcfg-*"
+      ignore_errors: true
       register: ifcfg_net_scripts
+    - name: set fact ifcfg net
+      set_fact:
+        results_logs: "{{ results_logs|combine({'ifcfg_net': '\n'.join(ifcfg_net_scripts.stdout_lines)\}) }}"
     - name: write ufcfg network scripts
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/network-scripts"
@@ -54,6 +70,9 @@
     - name: read /etc/hosts file
       shell: "cat /etc/hosts"
       register: hosts
+    - name: set fact hosts
+      set_fact:
+        results_logs: "{{ results_logs|combine({'hosts': '\n'.join(hosts.stdout_lines)\}) }}"
     - name: write /etc/hosts backup
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/hosts"
@@ -67,6 +86,9 @@
     - name: read /etc/fstab data
       shell: "cat /etc/fstab"
       register: fstab
+    - name: set fact fstab
+      set_fact:
+        results_logs: "{{ results_logs|combine({'fstab': '\n'.join(fstab.stdout_lines)}) }}"
     - name: write /etc/fstab backup
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/fstab"
@@ -79,7 +101,11 @@
   block:
     - name: get lvsdisplay output
       shell: "lvdisplay"
+      ignore_errors: true
       register: lvsdisplay
+    - name: set fact
+      set_fact:
+        results_logs: "{{ results_logs|combine({'lvsdisplay': '\n'.join(lvsdisplay.stdout_lines)}) }}"
     - name: dump lvsdisplay output
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lvdisplay"
@@ -92,7 +118,11 @@
   block:
     - name: retrieve ifconfig output
       shell: "ifconfig -a"
+      ignore_errors: true
       register: ifcfg
+    - name: set ifconfig fact
+      set_fact:
+        results_logs: "{{ results_logs|combine({'ifconfig': '\n'.join(ifcfg.stdout_lines)}) }}"
     - name: write ifconfig data
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/ifconfig"
@@ -106,6 +136,9 @@
     - name: check Java processes
       shell: "ps -ef | grep java | grep -v \"grep\" | awk NR==1'{print $1}'"
       register: crit_processes
+    - name: set critical processes fact
+      set_fact:
+        results_logs: "{{ results_logs|combine({'java': '\n'.join(crit_processes)}) }}"
     - name: dump critical java processes to log
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
@@ -117,6 +150,10 @@
       shell:  "cat /var/log/messages | sed -n -e '/error/p' -e'/warn/p'  | awk NR==1'{print $1}'"
       ignore_errors: true
       register: log_messages_events_error
+    - name: set log messages fact
+      set_fact:
+        results_logs:
+          - "{{ results_logs|combine({'log_messages_errors': '\n'.join(log_messages_events_error.stdout_lines)}) }}"
     - name: count /var/log/messages errors and warnings
       shell: "cat /var/log/messages | sed -n -e '/error/p' -e'/warn/p'|wc -l"
       ignore_errors: true
@@ -130,6 +167,9 @@
     - name: verify errors/warnings presence in /var/log/dmesg
       shell: "cat /var/log/dmesg | sed -n -e '/error/p' -e'/warn/p'  | awk NR==1'{print $1}'"
       register: log_dmesg_crit_events
+    - name: set fact log dmesg
+      set_fact:
+        results_logs: "{{ results_logs|combine({'dmesg': '\n'.join(log_dmesg_crit_events.stdout_lines)}) }}"
     - name: log critical alerts
       blockinfile:
         block: "{{ '\n'.join(log_dmesg_crit_events.stdout_lines) }}"

@@ -33,3 +33,6 @@ packages_to_exclude:
   - postgresql-client
   - postgresql-server
   - subversion
+results_pre: {}
+results_post: {}
+results_logs: {}
