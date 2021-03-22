@@ -1,21 +1,104 @@
 ---
-- name: get package manager repos
+- name: distro data
+  debug:
+    msg: "{{ansible_distribution  }}"
+  tags:
+    - patching
+
+- name: remove APT packages
+  apt:
+    name: "{{ item }}"
+    state: absent
+  ignore_errors: true
+  with_items: "{{ packages_to_exclude }}"
+  when: "ansible_distribution == 'Ubuntu'"
+  tags:
+    - patching
+
+- name: get YUM package manager repos
   shell: "yum repolist"
   register: yum_repos
+  when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
   tags:
     - patching
 - set_fact:
     startreposid: "{{ yum_repos.stdout_lines|select('match', 'repo id*')|list|first }}"
+  when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
   tags:
     - patching
 - set_fact:
     listrepos: "{{ yum_repos.stdout_lines[yum_repos.stdout_lines.index(startreposid)+1:-1] }}"
+  when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
   tags:
     - patching
-- name: disable package manager repos
+- name: disable YUM package manager repos
   yum:
-    disablerepo: "{{ item.split('/')[0] }}"
+    disablerepo: "{{ item.split('/')[ 0] }}"
   ignore_errors: true
-  with_items: "{{listrepos}}"
+  with_items: "{{ listrepos }}"
+  when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
+  tags:
+    - patching
+- name: enable YUM repos
+  yum:
+    enablerepo: "{{ item }}"
+  ignore_errors: true
+  with_items: "{{ rhel_enabled_repos }}"
+  when: "ansible_distribution == 'RedHat'"
+  tags:
+    - patching
+- name: remove YUM packages
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ packages_to_exclude }}"
+  ignore_errors: true
+  when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
+  tags:
+    - patching
+
+- name: get Zypper package manager repos
+  shell: "zypper repos --uri"
+  register: zypper_repos
+  when: "'openSUSE' in ansible_distribution"
+  tags:
+    - patching
+- set_fact:
+    startreposid: "{{ zypper_repos.stdout_lines|select('match', '---*')|list|first }}"
+  when: "'openSUSE' in ansible_distribution"
+  tags:
+    - patching
+- set_fact:
+    listrepos: "{{ zypper_repos.stdout_lines[zypper_repos.stdout_lines.index(startreposid)+1:] }}"
+  when: "'openSUSE' in ansible_distribution"
+  tags:
+    - patching
+- name: disable Zypper package manager repos
+  zypper_repository:
+    name: "{{ item.split()[2] }}"
+    enabled: no
+    repo: "{{ item.split()[-1] }}"
+  ignore_errors: true
+  with_items: "{{ listrepos }}"
+  when: "'openSUSE' in ansible_distribution"
+  tags:
+    - patching
+- name: enable Zypper repos
+  zypper_repository:
+    name: "{{ item.name }}"
+    repo: "{{ item.uri }}"
+    state: present
+    enabled: yes
+  with_items: "{{ suse_enabled_repos }}"
+  when: "'openSUSE' in ansible_distribution"
+  tags:
+    - patching
+- name: remove Zypper packages
+  zypper:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ packages_to_exclude }}"
+  ignore_errors: true
+  when: "'openSUSE' in ansible_distribution"
   tags:
     - patching
