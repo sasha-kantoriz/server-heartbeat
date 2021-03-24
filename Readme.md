@@ -5,7 +5,7 @@
 
 `playbook.yml` contains play that run ansible role on specified hosts
 Role contains stages:
-- __Setup__: creates directories for logs on remote servers and ansible server (`tags: pre`)
+- __Setup__: creates directories for logs on remote servers and ansible server (`tags: setup`)
 - __Pre__: collects pre-checks logs (`tags: pre`)
 - __Patching__: package manager and packages system editions (`tags: patching`)
 - __Post__: collects post-checks logs (`tags: patching`)
