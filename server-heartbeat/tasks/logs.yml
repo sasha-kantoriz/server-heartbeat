@@ -7,7 +7,7 @@
       register: timestamp
     - name: set fact timestamp
       set_fact:
-        results_logs: "{{ results_logs|combine({'timestamp': '\n'.join(timestamp.stdout_lines)}) }}"
+        results_logs: "{{ results_logs|combine({'timestamp': ' '.join(timestamp.stdout_lines)|quote}) }}"
     - name: write timestamp
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
@@ -19,7 +19,7 @@
       register: uptime
     - name: set fact uptime
       set_fact:
-        results_logs: "{{ results_logs|combine({'uptime': '\n'.join(uptime.stdout_lines)}) }}"
+        results_logs: "{{ results_logs|combine({'uptime': ' '.join(uptime.stdout_lines)|quote}) }}"
     - name: write uptime info
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
@@ -31,7 +31,7 @@
       register: df_total
     - name: set fact df
       set_fact:
-        results_logs: "{{ results_logs|combine({'df-total': '\n'.join(df_total.stdout_lines)}) }}"
+        results_logs: "{{ results_logs|combine({'df-total': ' '.join(df_total.stdout_lines)|quote}) }}"
     - name: write df output
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
@@ -43,7 +43,7 @@
       register: cpu_total
     - name: set fact cpu
       set_fact:
-        results_logs: "{{ results_logs|combine({'cpu-total': '\n'.join(cpu_total.stdout_lines)}) }}"
+        results_logs: "{{ results_logs|combine({'cpu-total': ' '.join(cpu_total.stdout_lines)|quote}) }}"
     - name: dump CPU data
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
@@ -56,7 +56,7 @@
       register: ifcfg_net_scripts
     - name: set fact ifcfg net
       set_fact:
-        results_logs: "{{ results_logs|combine({'ifcfg_net': '\n'.join(ifcfg_net_scripts.stdout_lines)}) }}"
+        results_logs: "{{ results_logs|combine({'ifcfg_net': ' '.join(ifcfg_net_scripts.stdout_lines)|quote}) }}"
     - name: write ufcfg network scripts
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/network-scripts"
@@ -72,7 +72,7 @@
       register: hosts
     - name: set fact hosts
       set_fact:
-        results_logs: "{{ results_logs|combine({'hosts': '\n'.join(hosts.stdout_lines)}) }}"
+        results_logs: "{{ results_logs|combine({'hosts': ' '.join(hosts.stdout_lines)|quote}) }}"
     - name: write /etc/hosts backup
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/hosts"
@@ -88,7 +88,7 @@
       register: fstab
     - name: set fact fstab
       set_fact:
-        results_logs: "{{ results_logs|combine({'fstab': '\n'.join(fstab.stdout_lines)}) }}"
+        results_logs: "{{ results_logs|combine({'fstab': ' '.join(fstab.stdout_lines)|quote}) }}"
     - name: write /etc/fstab backup
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/fstab"
@@ -105,7 +105,7 @@
       register: lvsdisplay
     - name: set fact
       set_fact:
-        results_logs: "{{ results_logs|combine({'lvsdisplay': '\n'.join(lvsdisplay.stdout_lines)}) }}"
+        results_logs: "{{ results_logs|combine({'lvsdisplay': ' '.join(lvsdisplay.stdout_lines)|quote}) }}"
     - name: dump lvsdisplay output
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lvdisplay"
@@ -122,7 +122,7 @@
       register: ifcfg
     - name: set ifconfig fact
       set_fact:
-        results_logs: "{{ results_logs|combine({'ifconfig': '\n'.join(ifcfg.stdout_lines)}) }}"
+        results_logs: "{{ results_logs|combine({'ifconfig': ' '.join(ifcfg.stdout_lines)|quote}) }}"
     - name: write ifconfig data
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/ifconfig"
@@ -138,7 +138,7 @@
       register: crit_processes
     - name: set critical processes fact
       set_fact:
-        results_logs: "{{ results_logs|combine({'java': '\n'.join(crit_processes)}) }}"
+        results_logs: "{{ results_logs|combine({'java': ' '.join(crit_processes)|quote}) }}"
     - name: dump critical java processes to log
       lineinfile:
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
@@ -153,7 +153,7 @@
     - name: set log messages fact
       set_fact:
         results_logs:
-          - "{{ results_logs|combine({'log_messages_errors': '\n'.join(log_messages_events_error.stdout_lines)}) }}"
+          - "{{ results_logs|combine({'log_messages_errors': ' '.join(log_messages_events_error.stdout_lines)|quote}) }}"
     - name: count /var/log/messages errors and warnings
       shell: "cat /var/log/messages | sed -n -e '/error/p' -e'/warn/p'|wc -l"
       ignore_errors: true
@@ -169,10 +169,10 @@
       register: log_dmesg_crit_events
     - name: set fact log dmesg
       set_fact:
-        results_logs: "{{ results_logs|combine({'dmesg': '\n'.join(log_dmesg_crit_events.stdout_lines)}) }}"
+        results_logs: "{{ results_logs|combine({'dmesg': ' '.join(log_dmesg_crit_events.stdout_lines)|quote}) }}"
     - name: log critical alerts
       blockinfile:
-        block: "{{ '\n'.join(log_dmesg_crit_events.stdout_lines) }}"
+        block: "{{ ' '.join(log_dmesg_crit_events.stdout_lines) }}"
         path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
       when: log_dmesg_crit_events.stdout_lines|length!=0
     - name: log absence critical alerts
