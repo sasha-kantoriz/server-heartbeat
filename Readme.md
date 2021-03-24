@@ -1,5 +1,5 @@
 1. Create virtual environment: `python3 -m venv .`
-2. Install Ansible package: `./bin/pip install - r requirements.txt`
+2. Install Ansible package: `./bin/pip install -r requirements.txt`
 3. Write inventory file
 3. Role invokation:
 
