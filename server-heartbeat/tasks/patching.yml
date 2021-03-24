@@ -5,15 +5,15 @@
   tags:
     - patching
 
-- name: remove APT packages
-  apt:
-    name: "{{ item }}"
-    state: absent
-  ignore_errors: true
-  with_items: "{{ packages_to_exclude }}"
-  when: "ansible_distribution == 'Ubuntu'"
-  tags:
-    - patching
+#- name: remove APT packages
+#  apt:
+#    name: "{{ item }}"
+#    state: absent
+#  ignore_errors: true
+#  with_items: "{{ packages_to_exclude }}"
+#  when: "ansible_distribution == 'Ubuntu'"
+#  tags:
+#    - patching
 
 - name: get YUM package manager repos
   shell: "yum repolist"
@@ -47,11 +47,11 @@
   when: "ansible_distribution == 'RedHat'"
   tags:
     - patching
-- name: remove YUM packages
+- name: update OS
   yum:
-    name: "{{ item }}"
-    state: absent
-  with_items: "{{ packages_to_exclude }}"
+    name: "*"
+    exclude: "{{ packages_to_exclude }}"
+    state: latest
   ignore_errors: true
   when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
   tags:
@@ -93,12 +93,12 @@
   when: "'openSUSE' in ansible_distribution"
   tags:
     - patching
-- name: remove Zypper packages
-  zypper:
-    name: "{{ item }}"
-    state: absent
-  with_items: "{{ packages_to_exclude }}"
-  ignore_errors: true
-  when: "'openSUSE' in ansible_distribution"
-  tags:
-    - patching
+#- name: remove Zypper packages
+#  zypper:
+#    name: "{{ item }}"
+#    state: absent
+#  with_items: "{{ packages_to_exclude }}"
+#  ignore_errors: true
+#  when: "'openSUSE' in ansible_distribution"
+#  tags:
+#    - patching
