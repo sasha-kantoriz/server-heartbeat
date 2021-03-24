@@ -26,7 +26,7 @@
       register: uname_post
     - name:
       set_fact:
-        results_post: "{{ results_post|combine({'uname-post': '\n'.join(uname_post.stdout_lines"}) }}"
+        results_post: "{{ results_post|combine({'uname-post': '\n'.join(uname_post.stdout_lines)}) }}"
     - name: copy uname output
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/uname-post"
@@ -41,7 +41,7 @@
       register: syscfg_net_post
     - name: set fact syscfg
       set_fact:
-        results_post: "{{ results_post|combine({'syscfg_net-post': '\n'.join(syscfg_net_post.stdout_lines"}) }}"
+        results_post: "{{ results_post|combine({'syscfg_net-post': '\n'.join(syscfg_net_post.stdout_lines)}) }}"
     - name: backup syscfg network file
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sys-network-post"
@@ -55,7 +55,7 @@
       register: routes_post
     - name: set fact routes
       set_fact:
-        results_post: "{{ results_post|combine({'route-post': '\n'.join(routes_post.stdout_lines"}) }}"
+        results_post: "{{ results_post|combine({'route-post': '\n'.join(routes_post.stdout_lines)}) }}"
     - name: log routes data
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/route-post"
@@ -69,7 +69,7 @@
       register: mounts_post
     - name: set fact mounts
       set_fact:
-        results_post: "{{ results_post|combine({'mount-post': '\n'.join(mounts_post.stdout_lines"}) }}"
+        results_post: "{{ results_post|combine({'mount-post': '\n'.join(mounts_post.stdout_lines)}) }}"
     - name: write mounts info
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/mount-l-post"
@@ -83,7 +83,7 @@
       register: df_post
     - name: set fact df
       set_fact:
-        results_post: "{{ results_post|combine({'df-post': '\n'.join(df_post.stdout_lines"}) }}"
+        results_post: "{{ results_post|combine({'df-post': '\n'.join(df_post.stdout_lines)}) }}"
     - name: dump fs disks info
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/df-post"
@@ -111,7 +111,7 @@
       register: lsblk_post
     - name: set fact lsblk
       set_fact:
-        results_post: "{{ results_post|combine({'lsblk-post': '\n'.join(lsblk_post.stdout_lines"}) }}"
+        results_post: "{{ results_post|combine({'lsblk-post': '\n'.join(lsblk_post.stdout_lines)}) }}"
     - name: dump block devices data
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/lsblk-post"
@@ -170,7 +170,7 @@
       register: sssd_post
     - name: set fact sssd
       set_fact:
-        results_post: "{{ results_post|combine({'sssd-post': '\n'.join(sssd_post.stdout_lines"}) }}"
+        results_post: "{{ results_post|combine({'sssd-post': '\n'.join(sssd_post.stdout_lines)}) }}"
     - name: write sssd service status
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sssd-post"
