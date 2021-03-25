@@ -3,7 +3,7 @@
   block:
     - name: begin precheck [PRE]
       debug:
-        msg:  "######################################## TAKING PRECHECK LOGS ########################################################.stdout###"
+        msg:  "######################################## TAKING PRECHECK LOGS ###########################################################"
   tags:
     - pre
 - name: verify hostname
