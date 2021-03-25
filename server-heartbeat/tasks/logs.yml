@@ -39,6 +39,19 @@
         msg: "{{ df_total.stdout_lines }}"
   tags:
     - logs
+- name: list FS that are below 3GB available
+  block:
+    - name: retrieve df output
+      shell: "df -hP | awk '$4~/([0-9]+\.?[0-9]+[KM])|([1-3]G)|([1-2]\.[0-9]G)/'"
+      register: low_space_fs
+    - name: set low space FS fact
+      set_fact:
+        results_logs: "{{ results|combine({'df-low': low_space_fs.stdout.replace(\"'\", '\"')|quote}) }}"
+    - name: show FS with small capacity available
+      debug:
+        msg: "{{ low_space_fs.stdout_lines }}"
+  tags:
+    - logs
 - name: retrieve Mem/CPU info
   block:
     - name: read Mem/CPU data
