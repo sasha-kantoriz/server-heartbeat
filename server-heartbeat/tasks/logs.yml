@@ -7,11 +7,12 @@
       register: timestamp
     - name: set fact timestamp
       set_fact:
-        results_logs: '{{ results_logs|combine({"timestamp": " ".join(timestamp.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'timestamp': timestamp.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: write timestamp
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ timestamp.stdout }}"
+      debug:
+        msg: "{{ timestamp.stdout_lines }}"
+  tags:
+    - logs
 - name: get uptime data
   block:
     - name: retrieve uptime info
@@ -19,11 +20,12 @@
       register: uptime
     - name: set fact uptime
       set_fact:
-        results_logs: '{{ results_logs|combine({"uptime": " ".join(uptime.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'uptime': uptime.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: write uptime info
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ uptime.stdout }}"
+      debug:
+        msg: "{{ uptime.stdout_lines }}"
+  tags:
+    - logs
 - name: mounted FS data
   block:
     - name: retrive df file systems data output
@@ -31,11 +33,12 @@
       register: df_total
     - name: set fact df
       set_fact:
-        results_logs: '{{ results_logs|combine({"df-total": " ".join(df_total.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'df-total': df_total.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: write df output
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ df_total.stdout }}"
+      debug:
+        msg: "{{ df_total.stdout_lines }}"
+  tags:
+    - logs
 - name: retrieve Mem/CPU info
   block:
     - name: read Mem/CPU data
@@ -43,11 +46,12 @@
       register: cpu_total
     - name: set fact cpu
       set_fact:
-        results_logs: '{{ results_logs|combine({"cpu-total": " ".join(cpu_total.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'cpu-total': cpu_total.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: dump CPU data
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ cpu_total.stdout }}"
+      debug:
+        msg: "{{ cpu_total.stdout_lines }}"
+  tags:
+    - logs
 - name:  log ifcfg network scripts
   block:
     - name: read ifcfg network scripts
@@ -56,15 +60,12 @@
       register: ifcfg_net_scripts
     - name: set fact ifcfg net
       set_fact:
-        results_logs: '{{ results_logs|combine({"ifcfg_net": " ".join(ifcfg_net_scripts.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'ifcfg_net': ifcfg_net_scripts.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: write ufcfg network scripts
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/network-scripts"
-        content: "{{ ifcfg_net_scripts.stdout }}"
-    - name: write backup msg to log file
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "Backup of Netowrk scrips saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/network-scripts"
+      debug:
+        msg: "{{ ifcfg_net_scripts.stdout_lines }}"
+  tags:
+    - logs
 - name: backup /etc/hosts file
   block:
     - name: read /etc/hosts file
@@ -72,15 +73,12 @@
       register: hosts
     - name: set fact hosts
       set_fact:
-        results_logs: '{{ results_logs|combine({"hosts": " ".join(hosts.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'hosts': hosts.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: write /etc/hosts backup
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/hosts"
-        content: "{{ hosts.stdout }}"
-    - name: write /etc/hosts backup msg
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "Backup of host file saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/hosts"
+      debug:
+        msg: "{{ hosts.stdout_lines }}"
+  tags:
+    - logs
 - name: retrieve fstab data
   block:
     - name: read /etc/fstab data
@@ -88,15 +86,12 @@
       register: fstab
     - name: set fact fstab
       set_fact:
-        results_logs: '{{ results_logs|combine({"fstab": " ".join(fstab.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'fstab': fstab.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: write /etc/fstab backup
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/fstab"
-        content: "{{ fstab.stdout }}"
-    - name: write /etc/fstab backup msg
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "Backup of fstab file saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/fstab"
+      debug:
+        msg: "{{ fstab.stdout_lines }}"
+  tags:
+    - logs
 - name: retrieve lvsdisplay data
   block:
     - name: get lvsdisplay output
@@ -105,15 +100,12 @@
       register: lvsdisplay
     - name: set fact
       set_fact:
-        results_logs: '{{ results_logs|combine({"lvsdisplay": " ".join(lvsdisplay.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'lvsdisplay': lvsdisplay.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: dump lvsdisplay output
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lvdisplay"
-        content: "lvsdsiplay.stdout"
-    - name: write blvsdisplay backup msg
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "Backup of lvdisplay  saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lvdisplay"
+      debug:
+        msg: "{{ lvsdisplay.stdout_lines }}"
+  tags:
+    - logs
 - name: get ifconfig data
   block:
     - name: retrieve ifconfig output
@@ -122,15 +114,12 @@
       register: ifcfg
     - name: set ifconfig fact
       set_fact:
-        results_logs: '{{ results_logs|combine({"ifconfig": " ".join(ifcfg.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'ifconfig': ifcfg.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: write ifconfig data
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/ifconfig"
-        content: "Backup of ifconfig -a saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/ifconfig"
-    - name: write ifconfig backup message
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "Backup of ifconfig -a saved at /root/pre-post/ifconfig"
+      debug:
+        msg: "{{ ifcfg.stdout_lines }}"
+  tags:
+    - logs
 - name: list java processes
   block:
     - name: check Java processes
@@ -138,12 +127,13 @@
       register: crit_processes
     - name: set critical processes fact
       set_fact:
-        results_logs: '{{ results_logs|combine({"java": " ".join(crit_processes)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'java': crit_processes.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: dump critical java processes to log
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line:     "Some critical proccess are running in background. Check ps -ef"
+      debug:
+        msg: "Some critical proccess are running in background. Check ps -ef.\n{{ crit_processes.stdout_lines }}"
       when: "{{ crit_processes.stdout_lines|length!=0 }}"
+  tags:
+    - logs
 - name: list warnings and errors /var/log/messages
   block:
     - name: read /var/log/messages
@@ -152,15 +142,19 @@
       register: log_messages_events_error
     - name: set log messages fact
       set_fact:
-        results_logs: '{{ results_logs|combine({"log_messages_errors": " ".join(log_messages_events_error.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'log_messages_errors': log_messages_events_error.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: count /var/log/messages errors and warnings
       shell: "cat /var/log/messages | sed -n -e '/error/p' -e'/warn/p'|wc -l"
       ignore_errors: true
       register: var_log_errors_and_warnings_num
     - name: write crtitical alerts log message
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ var_log_errors_and_warnings_num.stdout }} critical error/warning messages found."
+      debug:
+        msg: "{{ var_log_errors_and_warnings_num.stdout }} critical error/warning messages found."
+    - name: write crtitical alerts log message
+      debug:
+        msg: "{{ log_messages_events_error.stdout_lines }}"
+  tags:
+    - logs
 - name: read dmesg errors and warnings
   block:
     - name: verify errors/warnings presence in /var/log/dmesg
@@ -168,18 +162,19 @@
       register: log_dmesg_crit_events
     - name: set fact log dmesg
       set_fact:
-        results_logs: '{{ results_logs|combine({"dmesg": " ".join(log_dmesg_crit_events.stdout_lines)|quote}) }}'
+        results_logs: "{{ results_logs|combine({'dmesg': log_dmesg_crit_events.stdout.replace(\"'\",'\"')|quote}) }}"
     - name: log critical alerts
-      blockinfile:
-        block: "{{ ' '.join(log_dmesg_crit_events.stdout_lines) }}"
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+      debug:
+        msg: "{{ log_dmesg_crit_events.stdout_lines }}"
       when: log_dmesg_crit_events.stdout_lines|length!=0
     - name: log absence critical alerts
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "No critical alerts found in /var/log/dmesg"
+      debug:
+        msg: "No critical alerts found in /var/log/dmesg"
       when: log_dmesg_crit_events.stdout_lines|length==0
+  tags:
+    - logs
 - name: write logs collection finished
-  lineinfile:
-    path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-    line: "###################################### PRECHECK LOGS COLLECTED  #########################################################"
+  debug:
+    msg: "###################################### PRECHECK LOGS COLLECTED  #########################################################"
+  tags:
+    - logs

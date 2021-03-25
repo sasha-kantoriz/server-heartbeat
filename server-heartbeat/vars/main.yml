@@ -1,7 +1,7 @@
 ---
 # vars file for server-heartbeat
-ansible_server_logs_path: ~/logs-servers
-remote_logs_path: /root/logs-server
+ansible_server_logs_path: /data-export
+remote_logs_path: /data-export
 rhel_enabled_repos:
   - rhel-7-server-e4s-rpms
 suse_enabled_repos:
@@ -33,6 +33,16 @@ packages_to_exclude:
   - postgresql-client
   - postgresql-server
   - subversion
+services_to_halt:
+  - mysql
+  - mysqld
+  - oracle
+  - httpd
+  - apathetic
+  - nginx
+  - clustering
+  - tomcat
+  - nfs
 results_pre: {}
 results_post: {}
 results_logs: {}

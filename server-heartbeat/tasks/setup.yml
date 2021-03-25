@@ -6,48 +6,18 @@
   tags:
     - clear_remote
     - setup
-- name: Clear ansible server logs folder
-  file:
-    dest: "{{ ansible_server_logs_path }}/"
-    state: absent
-  delegate_to: localhost
-  tags:
-    - clear_local
-#    - setup
-- set_fact:
-    remote_logs: "{{ remote_logs_path }}/{{ ansible_ssh_host }}-{{ ansible_date_time.iso8601 }}"
 - name: Make remote logs folders
   file:
-    dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}"
+    dest: "{{ remote_logs_path }}"
     state: directory
-  tags:
-    - setup_remote
-    - setup
-- name: Make remote logs folders
-  file:
-    dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre"
-    state: directory
-  tags:
-    - setup_remote
-    - setup
-- name: Make remote logs folders
-  file:
-    dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post"
-    state: directory
+    owner: "{{ ansible_user }}"
+    mode: '777'
   tags:
     - setup_remote
     - setup
 - name: Make ansible server logs folder
   file:
     dest: "{{ ansible_server_logs_path }}"
-    state: directory
-  delegate_to: localhost
-  tags:
-    - setup_local
-    - setup
-- name: Make ansible server previous logs folder
-  file:
-    dest: "{{ ansible_server_logs_path }}/prev"
     state: directory
   delegate_to: localhost
   tags:

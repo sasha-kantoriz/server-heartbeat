@@ -5,6 +5,19 @@
   tags:
     - patching
 
+- name: halt services
+  service:
+    state: stopped
+    name: "{{ item }}"
+  ignore_errors: true
+  register: services_halting_output
+  with_items: "{{ services_to_halt }}"
+  tags:
+    - patching
+
+- debug:
+    msg: "{{ services_halting_output.stdout_lines }}"
+
 #- name: remove APT packages
 #  apt:
 #    name: "{{ item }}"
@@ -19,7 +32,8 @@
 - name: update katello package
   yum:
     name: 'http://satellite6/pub/katello-ca-consumer-latest.noarch.rpm'
-    state: lates
+    state: latest
+  ignore_errors: true
   when: "ansible_distribution == 'RedHat'"
   tags:
     - patching
@@ -112,3 +126,11 @@
 #  when: "'openSUSE' in ansible_distribution"
 #  tags:
 #    - patching
+
+- name: notify patching stage ended / reboot server
+  debug:
+    msg:  "######################################## DONE PATCHING RESTART ###########################################################"
+  notify:
+    - reboot
+  tags:
+    - patching

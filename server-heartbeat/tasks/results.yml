@@ -23,7 +23,15 @@
   tags:
     - csv
 
-#  delegate_to: localhost
+- name: change log files permission
+  file:
+    path: "{{ item }}"
+    owner: "{{ ansible_user }}"
+    mode: '0644'
+  with_items:
+    - "{{ remote_logs_path }}/{{ prefix }}-pre.csv"
+    - "{{ remote_logs_path }}/{{ prefix }}-post.csv"
+    - "{{ remote_logs_path }}/{{ prefix }}-logs.csv"
 
 - name: Download CSV logs
   fetch:
