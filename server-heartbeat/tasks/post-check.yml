@@ -1,178 +1,179 @@
 ---
-- name: initialize post checks
+- name: initialize post checks [POST]
   debug:
     msg: "############################## TAKING POSTCHECK  LOGS & COMPARING WITH PRECHECK  ########################################"
   tags:
     - post
 - name: verify hostname
   block:
-    - name: read hostname
+    - name: read hostname [POST]
       shell: "hostname"
       register: hostname_post
     - name: set fact hostname
       set_fact:
-        results_post: '{{ results_post|combine({"hostname": "%%".join(hostname_post.stdout_lines)|quote }) }}'
+        results_post: "{{ results_post|combine({'hostname': hostname_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: log hostname
       debug:
-        msg: "{{ hostname_post.stdout }}"
+        msg: "{{ hostname_post.stdout_lines }}"
   tags:
     - post
 - name: get uname output
   block:
-    - name: retrieve dist data
+    - name: retrieve dist data [POST]
       shell: "uname -r"
       register: uname_post
     - name:
       set_fact:
-        results_post: '{{ results_post|combine({"uname": "%%".join(uname_post.stdout_lines)|quote}) }}'
+        results_post: "{{ results_post|combine({'uname': uname_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: debug uname output
-        msg: "{{ uname_post.stdout }}"
+      debug:
+        msg: "{{ uname_post.stdout_lines }}"
   tags:
     - post
 - name: read syscfg network file
   block:
-    - name: get network syscfg
+    - name: get network syscfg [POST]
       shell: "cat /etc/sysconfig/network"
       ignore_errors: true
       register: syscfg_net_post
     - name: set fact syscfg
       set_fact:
-        results_post: '{{ results_post|combine({"syscfg_net": "%%".join(syscfg_net_post.stdout_lines)|quote}) }}'
+        results_post: "{{ results_post|combine({'syscfg_net': syscfg_net_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: backup syscfg network file
       debug:
-        msg: "{{ syscfg_net_post.stdout }}"
+        msg: "{{ syscfg_net_post.stdout_lines }}"
   tags:
     - post
 - name: retrieve routes info
   block:
-    - name: get route output
+    - name: get route output [POST]
       shell: "route -n | sort"
       register: routes_post
     - name: set fact routes
       set_fact:
-        results_post: '{{ results_post|combine({"route": "%%".join(routes_post.stdout_lines)|quote}) }}'
+        results_post: "{{ results_post|combine({'route': routes_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: log routes data
       debug:
-        msg: "{{ routes_post.stdout }}"
+        msg: "{{ routes_post.stdout_lines }}"
   tags:
     - post
 - name: list filesystems disks
   block:
-    - name: read df output
+    - name: read df output [POST]
       shell: "df -hP | awk '{print $1 \" \" $6}' | sort"
       register: df_post
     - name: set fact df
       set_fact:
-        results_post: '{{ results_post|combine({"df": "%%".join(df_post.stdout_lines)|quote}) }}'
+        results_post: "{{ results_post|combine({'df': df_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: dump fs disks info
       debug:
-        msg: "{{ df_post.stdout }}"
+        msg: "{{ df_post.stdout_lines }}"
   tags:
     - post
 - name: read mounts info
   block:
-    - name: get mount cmd output
+    - name: get mount cmd output [POST]
       shell: "mount -l | sort"
       register: mounts_post
     - name: set fact mounts
       set_fact:
-        results_post: '{{ results_post|combine({"mounts": "%%".join(mounts_post.stdout_lines)|quote}) }}'
+        results_post: "{{ results_post|combine({'mounts': mounts_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: write mounts info
       debug:
-        msg: "{{ mounts_post.stdout }}"
+        msg: "{{ mounts_post.stdout_lines }}"
   tags:
     - post
 - name: retrieve fdisk output
   block:
-    - name: get partitions info
+    - name: get partitions info [POST]
       shell: "fdisk -l"
       register: fdisk_post
     - name: set fact fdisk
       set_fact:
-        results_post: '{{ results_post|combine({"fdisk": "%%".join(fdisk_post.stdout_lines)|quote }) }}'
+        results_post: "{{ results_post|combine({'fdisk': fdisk_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: write fdisk info
       debug:
-        msg: "{{ fdisk_post }}"
+        msg: "{{ fdisk_post.stdout_lines }}"
   tags:
     - post
 - name: get lsblk info
   block:
-    - name: fetch block devices data
+    - name: fetch block devices data [POST]
       shell: "lsblk"
       register: lsblk_post
     - name: set fact lsblk
       set_fact:
-        results_post: '{{ results_post|combine({"lsblk": "%%".join(lsblk_post.stdout_lines|quote)}) }}'
+        results_post: "{{ results_post|combine({'lsblk': lsblk_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: dump block devices data
       debug:
-        msg: "{{ lsblk_post.stdout }}"
+        msg: "{{ lsblk_post.stdout_lines }}"
   tags:
     - post
 - name:
   block:
-    - name: read lv cmd output
+    - name: read lv cmd output [POST]
       shell: "lvs | sort "
       register: lvs_post
     - name:
       set_fact:
-        results_post: '{{ results_post|combine({"lvs": "%%".join(lvs_post.stdout_lines)|quote }) }}'
+        results_post: "{{ results_post|combine({'lvs': lvs_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: write lvs command output
       debug:
-        msg: "{{ lvs_post.stdout }}"
+        msg: "{{ lvs_post.stdout_lines }}"
   tags:
     - post
 - name: see itables systemctl services status
   block:
-    - name: check iptables service enablence\\
+    - name: check iptables service enablence\\ [POST]
       shell: "service iptables status"
       ignore_errors: true
       register: iptables_post
     - name: set fact iptables
       set_fact:
-        results_post: '{{ results_post|combine({"iptables": "%%".join(iptables_post.stdout_lines)|quote }) }}'
+        results_post: "{{ results_post|combine({'iptables': iptables_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: read/write iptables>
       debug:
-        msg: "{{ iptables_post.stdout }}"
+        msg: "{{ iptables_post.stdout_lines }}"
   tags:
     - post
 - name: grab firewalld service status
   block:
-    - name: check status firewalld service
+    - name: check status firewalld service [POST]
       shell: "service firewalld status"
       ignore_errors: true
       register: firewalld_post
     - name: set fact firewalld
       set_fact:
-        results_post: '{{ results_post|combine({"firewalld": "%%".join(firewalld.stdout_lines)|quote }) }}'
+        results_post: "{{ results_post|combine({'firewalld': firewalld.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: write firewalld service status
       debug:
-        msg: "{{ firewalld_post.stdout }}"
+        msg: "{{ firewalld_post.stdout_lines }}"
   tags:
     - post
 - name: fetch sssd systemctl status service
   block:
-    - name: get sssd service status
+    - name: get sssd service status [POST]
       shell: 'systemctl status sssd | grep -i active'
       ignore_errors: true
       register: sssd_post
     - name: set fact sssd
       set_fact:
-        results_post: '{{ results_post|combine({"sssd": "%%".join(sssd_post.stdout_lines)|quote}) }}'
+        results_post: "{{ results_post|combine({'sssd': sssd_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: write sssd service status
       debug:
-        msg: "{{ sssd_post.stdout }}"
+        msg: "{{ sssd_post.stdout_lines }}"
   tags:
     - post
 - name: get internet interfaces info
   block:
-    - name: retrieve ip addr output
+    - name: retrieve ip addr output [POST]
       shell: "ip addr | awk '/^[0-9]+:/ { sub(/:/,\"\",$2); iface=$2 } /^[[:space:]]*inet / { split($2, a, \"/\"); print iface\" : \"a[1] }' | sort"
       register: ipa_post
     - name: set fact ip address
       set_fact:
-        results_post: '{{ results_post|combine({"ipaddress": "%%".join(ipa_post.stdout_lines)|quote }) }}'
+        results_post: "{{ results_post|combine({'ipaddress': ipa_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: dump ip addr info
       debug:
-        msg: "{{ ipa_post.stdout }}"
+        msg: "{{ ipa_post.stdout_lines }}"
   tags:
     - post
