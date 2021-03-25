@@ -1,8 +1,7 @@
 ---
 - name: initialize post checks
-  copy:
-    dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/post-log"
-    content: "############################## TAKING POSTCHECK  LOGS & COMPARING WITH PRECHECK  ########################################"
+  debug:
+    msg: "############################## TAKING POSTCHECK  LOGS & COMPARING WITH PRECHECK  ########################################"
   tags:
     - post
 - name: verify hostname
@@ -14,9 +13,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"hostname-post": " ".join(hostname_post.stdout_lines)|quote }) }}'
     - name: log hostname
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/hostname-post"
-        content: "{{ hostname_post.stdout }}"
+      debug:
+        msg: "{{ hostname_post.stdout }}"
   tags:
     - post
 - name: get uname output
@@ -27,10 +25,8 @@
     - name:
       set_fact:
         results_post: '{{ results_post|combine({"uname-post": " ".join(uname_post.stdout_lines)|quote}) }}'
-    - name: copy uname output
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/uname-post"
-        content: "{{ uname_post.stdout }}"
+    - name: debug uname output
+        msg: "{{ uname_post.stdout }}"
   tags:
     - post
 - name: read syscfg network file
@@ -43,9 +39,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"syscfg_net-post": " ".join(syscfg_net_post.stdout_lines)|quote}) }}'
     - name: backup syscfg network file
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sys-network-post"
-        content: "{{ syscfg_net_post.stdout }}"
+      debug:
+        msg: "{{ syscfg_net_post.stdout }}"
   tags:
     - post
 - name: retrieve routes info
@@ -57,9 +52,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"route-post": " ".join(routes_post.stdout_lines)|quote}) }}'
     - name: log routes data
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/route-post"
-        content: "{{ routes_post.stdout }}"
+      debug:
+        msg: "{{ routes_post.stdout }}"
   tags:
     - post
 - name: read mounts info
@@ -71,9 +65,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"mount-post": " ".join(mounts_post.stdout_lines)|quote}) }}'
     - name: write mounts info
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/mount-l-post"
-        content: "{{ mounts_post.stdout }}"
+      debug:
+        msg: "{{ mounts_post.stdout }}"
   tags:
     - post
 - name: list filesystems disks
@@ -85,9 +78,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"df-post": " ".join(df_post.stdout_lines)|quote}) }}'
     - name: dump fs disks info
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/df-post"
-        content: "{{ df_post.stdout }}"
+      debug:
+        msg: "{{ df_post.stdout }}"
   tags:
     - post
 - name: retrieve fdisk output
@@ -99,9 +91,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"fdisk-post": " ".join(fdisk_post.stdout_lines)|quote }) }}'
     - name: write fdisk info
-      copy:
-        dest: '{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/fdisk-l-post'
-        content: "{{ fdisk_post }}"
+      debug:
+        msg: "{{ fdisk_post }}"
   tags:
     - post
 - name: get lsblk info
@@ -113,9 +104,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"lsblk-post": " ".join(lsblk_post.stdout_lines|quote)}) }}'
     - name: dump block devices data
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/lsblk-post"
-        content: "{{ lsblk_post.stdout }}"
+      debug:
+        msg: "{{ lsblk_post.stdout }}"
   tags:
     - post
 - name:
@@ -127,9 +117,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"lvs-post": " ".join(lvs_post.stdout_lines)|quote }) }}'
     - name: write lvs command output
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/lvs-post"
-        content: "{{ lvs_post.stdout }}"
+      debug:
+        msg: "{{ lvs_post.stdout }}"
   tags:
     - post
 - name: see itables systemctl services status
@@ -142,9 +131,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"iptables-post": " ".join(iptables_post.stdout_lines)|quote }) }}'
     - name: read/write iptables>
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/iptables-post"
-        content: "{{ iptables_post.stdout }}"
+      debug:
+        msg: "{{ iptables_post.stdout }}"
   tags:
     - post
 - name: grab firewalld service status
@@ -157,9 +145,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"firewalld-post": " ".join(firewalld.stdout_lines)|quote }) }}'
     - name: write firewalld service status
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/firewall-post"
-        content: "{{ firewalld_post.stdout }}"
+      debug:
+        msg: "{{ firewalld_post.stdout }}"
   tags:
     - post
 - name: fetch sssd systemctl status service
@@ -172,23 +159,8 @@
       set_fact:
         results_post: '{{ results_post|combine({"sssd-post": " ".join(sssd_post.stdout_lines)|quote}) }}'
     - name: write sssd service status
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sssd-post"
-        content: "{{ sssd_post.stdout }}"
-  tags:
-    - post
-- name: retrieve Memory/CPU info
-  block:
-    - name: read CPU data
-      shell: "echo -e  \"Total CPU: `cat /proc/cpuinfo  | grep \"processor\" | wc -l` Memory: `cat /proc/meminfo | grep -i memtotal | awk '{print $2}'` kb before recycle\""
-      register: cpu_post
-    - name: set fact Memory/CPU
-      set_fact:
-        results_post: '{{ results_post|combine({"cpu-post": " ".join(cpu_post.stdout_lines)|quote }) }}'
-    - name: dump CPU data
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/post-log"
-        line: "{{ cpu_post.stdout }}"
+      debug:
+        msg: "{{ sssd_post.stdout }}"
   tags:
     - post
 - name: get internet interfaces info
@@ -200,8 +172,7 @@
       set_fact:
         results_post: '{{ results_post|combine({"ipaddress-post": " ".join(ipa_post.stdout_lines)|quote }) }}'
     - name: dump ip addr info
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/ips-post"
-        content: "{{ ipa_post.stdout }}"
+      debug:
+        msg: "{{ ipa_post.stdout }}"
   tags:
     - post

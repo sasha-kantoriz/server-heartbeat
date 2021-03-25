@@ -9,9 +9,10 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"timestamp": " ".join(timestamp.stdout_lines)|quote}) }}'
     - name: write timestamp
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ timestamp.stdout }}"
+      debug:
+        msg: "{{ timestamp.stdout }}"
+  tags:
+    - logs
 - name: get uptime data
   block:
     - name: retrieve uptime info
@@ -21,9 +22,8 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"uptime": " ".join(uptime.stdout_lines)|quote}) }}'
     - name: write uptime info
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ uptime.stdout }}"
+      debug:
+        msg: "{{ uptime.stdout }}"
 - name: mounted FS data
   block:
     - name: retrive df file systems data output
@@ -33,9 +33,8 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"df-total": " ".join(df_total.stdout_lines)|quote}) }}'
     - name: write df output
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ df_total.stdout }}"
+      debug:
+        msg: "{{ df_total.stdout }}"
 - name: retrieve Mem/CPU info
   block:
     - name: read Mem/CPU data
@@ -45,9 +44,8 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"cpu-total": " ".join(cpu_total.stdout_lines)|quote}) }}'
     - name: dump CPU data
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ cpu_total.stdout }}"
+      debug:
+        msg: "{{ cpu_total.stdout }}"
 - name:  log ifcfg network scripts
   block:
     - name: read ifcfg network scripts
@@ -58,13 +56,8 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"ifcfg_net": " ".join(ifcfg_net_scripts.stdout_lines)|quote}) }}'
     - name: write ufcfg network scripts
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/network-scripts"
-        content: "{{ ifcfg_net_scripts.stdout }}"
-    - name: write backup msg to log file
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "Backup of Netowrk scrips saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/network-scripts"
+      debug:
+        msg: "{{ ifcfg_net_scripts.stdout }}"
 - name: backup /etc/hosts file
   block:
     - name: read /etc/hosts file
@@ -74,13 +67,8 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"hosts": " ".join(hosts.stdout_lines)|quote}) }}'
     - name: write /etc/hosts backup
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/hosts"
-        content: "{{ hosts.stdout }}"
-    - name: write /etc/hosts backup msg
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "Backup of host file saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/hosts"
+      debug:
+        msg: "{{ hosts.stdout }}"
 - name: retrieve fstab data
   block:
     - name: read /etc/fstab data
@@ -90,13 +78,8 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"fstab": " ".join(fstab.stdout_lines)|quote}) }}'
     - name: write /etc/fstab backup
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/fstab"
-        content: "{{ fstab.stdout }}"
-    - name: write /etc/fstab backup msg
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "Backup of fstab file saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/fstab"
+      debug:
+        msg: "{{ fstab.stdout }}"
 - name: retrieve lvsdisplay data
   block:
     - name: get lvsdisplay output
@@ -107,13 +90,8 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"lvsdisplay": " ".join(lvsdisplay.stdout_lines)|quote}) }}'
     - name: dump lvsdisplay output
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lvdisplay"
-        content: "lvsdsiplay.stdout"
-    - name: write blvsdisplay backup msg
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "Backup of lvdisplay  saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lvdisplay"
+      debug:
+        msg: "{{ lvsdsiplay.stdout }}"
 - name: get ifconfig data
   block:
     - name: retrieve ifconfig output
@@ -124,13 +102,8 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"ifconfig": " ".join(ifcfg.stdout_lines)|quote}) }}'
     - name: write ifconfig data
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/ifconfig"
-        content: "Backup of ifconfig -a saved at {{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/ifconfig"
-    - name: write ifconfig backup message
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "Backup of ifconfig -a saved at /root/pre-post/ifconfig"
+      debug:
+        msg: "{{ ifcfg.stdout_lines }}"
 - name: list java processes
   block:
     - name: check Java processes
@@ -140,9 +113,8 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"java": " ".join(crit_processes)|quote}) }}'
     - name: dump critical java processes to log
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line:     "Some critical proccess are running in background. Check ps -ef"
+      debug:
+        msg: "Some critical proccess are running in background. Check ps -ef.\n{{ crit_processes.stdout }}"
       when: "{{ crit_processes.stdout_lines|length!=0 }}"
 - name: list warnings and errors /var/log/messages
   block:
@@ -158,9 +130,11 @@
       ignore_errors: true
       register: var_log_errors_and_warnings_num
     - name: write crtitical alerts log message
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "{{ var_log_errors_and_warnings_num.stdout }} critical error/warning messages found."
+      debug:
+        msg: "{{ var_log_errors_and_warnings_num.stdout }} critical error/warning messages found."
+    - name: write crtitical alerts log message
+      debug:
+        msg: "{{ log_messages_events_error.stdout }}"
 - name: read dmesg errors and warnings
   block:
     - name: verify errors/warnings presence in /var/log/dmesg
@@ -170,16 +144,13 @@
       set_fact:
         results_logs: '{{ results_logs|combine({"dmesg": " ".join(log_dmesg_crit_events.stdout_lines)|quote}) }}'
     - name: log critical alerts
-      blockinfile:
-        block: "{{ ' '.join(log_dmesg_crit_events.stdout_lines) }}"
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
+      debug:
+        msg: "{{ ' '.join(log_dmesg_crit_events.stdout_lines) }}"
       when: log_dmesg_crit_events.stdout_lines|length!=0
     - name: log absence critical alerts
-      lineinfile:
-        path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-        line: "No critical alerts found in /var/log/dmesg"
+      debug:
+        msg: "No critical alerts found in /var/log/dmesg"
       when: log_dmesg_crit_events.stdout_lines|length==0
 - name: write logs collection finished
-  lineinfile:
-    path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/pre-log"
-    line: "###################################### PRECHECK LOGS COLLECTED  #########################################################"
+  debug:
+    msg: "###################################### PRECHECK LOGS COLLECTED  #########################################################"
