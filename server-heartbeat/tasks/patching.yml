@@ -15,6 +15,16 @@
 #  tags:
 #    - patching
 
+### Katello
+- name: update katello package
+  yum:
+    name: 'http://satellite6/pub/katello-ca-consumer-latest.noarch.rpm'
+    state: lates
+  when: "ansible_distribution == 'RedHat'"
+  tags:
+    - patching
+###
+
 - name: get YUM package manager repos
   shell: "yum repolist"
   register: yum_repos
