@@ -11,7 +11,7 @@
       register: hostname_post
     - name: set fact hostname
       set_fact:
-        results_post: '{{ results_post|combine({"hostname": " ".join(hostname_post.stdout_lines)|quote }) }}'
+        results_post: '{{ results_post|combine({"hostname": "%%".join(hostname_post.stdout_lines)|quote }) }}'
     - name: log hostname
       debug:
         msg: "{{ hostname_post.stdout }}"
@@ -24,7 +24,7 @@
       register: uname_post
     - name:
       set_fact:
-        results_post: '{{ results_post|combine({"uname": " ".join(uname_post.stdout_lines)|quote}) }}'
+        results_post: '{{ results_post|combine({"uname": "%%".join(uname_post.stdout_lines)|quote}) }}'
     - name: debug uname output
         msg: "{{ uname_post.stdout }}"
   tags:
@@ -37,7 +37,7 @@
       register: syscfg_net_post
     - name: set fact syscfg
       set_fact:
-        results_post: '{{ results_post|combine({"syscfg_net": " ".join(syscfg_net_post.stdout_lines)|quote}) }}'
+        results_post: '{{ results_post|combine({"syscfg_net": "%%".join(syscfg_net_post.stdout_lines)|quote}) }}'
     - name: backup syscfg network file
       debug:
         msg: "{{ syscfg_net_post.stdout }}"
@@ -50,7 +50,7 @@
       register: routes_post
     - name: set fact routes
       set_fact:
-        results_post: '{{ results_post|combine({"route": " ".join(routes_post.stdout_lines)|quote}) }}'
+        results_post: '{{ results_post|combine({"route": "%%".join(routes_post.stdout_lines)|quote}) }}'
     - name: log routes data
       debug:
         msg: "{{ routes_post.stdout }}"
@@ -63,7 +63,7 @@
       register: df_post
     - name: set fact df
       set_fact:
-        results_post: '{{ results_post|combine({"df": " ".join(df_post.stdout_lines)|quote}) }}'
+        results_post: '{{ results_post|combine({"df": "%%".join(df_post.stdout_lines)|quote}) }}'
     - name: dump fs disks info
       debug:
         msg: "{{ df_post.stdout }}"
@@ -76,7 +76,7 @@
       register: mounts_post
     - name: set fact mounts
       set_fact:
-        results_post: '{{ results_post|combine({"mounts": " ".join(mounts_post.stdout_lines)|quote}) }}'
+        results_post: '{{ results_post|combine({"mounts": "%%".join(mounts_post.stdout_lines)|quote}) }}'
     - name: write mounts info
       debug:
         msg: "{{ mounts_post.stdout }}"
@@ -89,7 +89,7 @@
       register: fdisk_post
     - name: set fact fdisk
       set_fact:
-        results_post: '{{ results_post|combine({"fdisk": " ".join(fdisk_post.stdout_lines)|quote }) }}'
+        results_post: '{{ results_post|combine({"fdisk": "%%".join(fdisk_post.stdout_lines)|quote }) }}'
     - name: write fdisk info
       debug:
         msg: "{{ fdisk_post }}"
@@ -102,7 +102,7 @@
       register: lsblk_post
     - name: set fact lsblk
       set_fact:
-        results_post: '{{ results_post|combine({"lsblk": " ".join(lsblk_post.stdout_lines|quote)}) }}'
+        results_post: '{{ results_post|combine({"lsblk": "%%".join(lsblk_post.stdout_lines|quote)}) }}'
     - name: dump block devices data
       debug:
         msg: "{{ lsblk_post.stdout }}"
@@ -115,7 +115,7 @@
       register: lvs_post
     - name:
       set_fact:
-        results_post: '{{ results_post|combine({"lvs": " ".join(lvs_post.stdout_lines)|quote }) }}'
+        results_post: '{{ results_post|combine({"lvs": "%%".join(lvs_post.stdout_lines)|quote }) }}'
     - name: write lvs command output
       debug:
         msg: "{{ lvs_post.stdout }}"
@@ -129,7 +129,7 @@
       register: iptables_post
     - name: set fact iptables
       set_fact:
-        results_post: '{{ results_post|combine({"iptables": " ".join(iptables_post.stdout_lines)|quote }) }}'
+        results_post: '{{ results_post|combine({"iptables": "%%".join(iptables_post.stdout_lines)|quote }) }}'
     - name: read/write iptables>
       debug:
         msg: "{{ iptables_post.stdout }}"
@@ -143,7 +143,7 @@
       register: firewalld_post
     - name: set fact firewalld
       set_fact:
-        results_post: '{{ results_post|combine({"firewalld": " ".join(firewalld.stdout_lines)|quote }) }}'
+        results_post: '{{ results_post|combine({"firewalld": "%%".join(firewalld.stdout_lines)|quote }) }}'
     - name: write firewalld service status
       debug:
         msg: "{{ firewalld_post.stdout }}"
@@ -157,7 +157,7 @@
       register: sssd_post
     - name: set fact sssd
       set_fact:
-        results_post: '{{ results_post|combine({"sssd": " ".join(sssd_post.stdout_lines)|quote}) }}'
+        results_post: '{{ results_post|combine({"sssd": "%%".join(sssd_post.stdout_lines)|quote}) }}'
     - name: write sssd service status
       debug:
         msg: "{{ sssd_post.stdout }}"
@@ -170,7 +170,7 @@
       register: ipa_post
     - name: set fact ip address
       set_fact:
-        results_post: '{{ results_post|combine({"ipaddress": " ".join(ipa_post.stdout_lines)|quote }) }}'
+        results_post: '{{ results_post|combine({"ipaddress": "%%".join(ipa_post.stdout_lines)|quote }) }}'
     - name: dump ip addr info
       debug:
         msg: "{{ ipa_post.stdout }}"

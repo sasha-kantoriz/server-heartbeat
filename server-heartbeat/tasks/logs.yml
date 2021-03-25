@@ -7,7 +7,7 @@
       register: timestamp
     - name: set fact timestamp
       set_fact:
-        results_logs: '{{ results_logs|combine({"timestamp": " ".join(timestamp.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"timestamp": "%%".join(timestamp.stdout_lines)|quote}) }}'
     - name: write timestamp
       debug:
         msg: "{{ timestamp.stdout }}"
@@ -20,7 +20,7 @@
       register: uptime
     - name: set fact uptime
       set_fact:
-        results_logs: '{{ results_logs|combine({"uptime": " ".join(uptime.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"uptime": "%%".join(uptime.stdout_lines)|quote}) }}'
     - name: write uptime info
       debug:
         msg: "{{ uptime.stdout }}"
@@ -33,7 +33,7 @@
       register: df_total
     - name: set fact df
       set_fact:
-        results_logs: '{{ results_logs|combine({"df-total": " ".join(df_total.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"df-total": "%%".join(df_total.stdout_lines)|quote}) }}'
     - name: write df output
       debug:
         msg: "{{ df_total.stdout }}"
@@ -46,7 +46,7 @@
       register: cpu_total
     - name: set fact cpu
       set_fact:
-        results_logs: '{{ results_logs|combine({"cpu-total": " ".join(cpu_total.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"cpu-total": "%%".join(cpu_total.stdout_lines)|quote}) }}'
     - name: dump CPU data
       debug:
         msg: "{{ cpu_total.stdout }}"
@@ -60,7 +60,7 @@
       register: ifcfg_net_scripts
     - name: set fact ifcfg net
       set_fact:
-        results_logs: '{{ results_logs|combine({"ifcfg_net": " ".join(ifcfg_net_scripts.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"ifcfg_net": "%%".join(ifcfg_net_scripts.stdout_lines)|quote}) }}'
     - name: write ufcfg network scripts
       debug:
         msg: "{{ ifcfg_net_scripts.stdout }}"
@@ -73,7 +73,7 @@
       register: hosts
     - name: set fact hosts
       set_fact:
-        results_logs: '{{ results_logs|combine({"hosts": " ".join(hosts.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"hosts": "%%".join(hosts.stdout_lines)|quote}) }}'
     - name: write /etc/hosts backup
       debug:
         msg: "{{ hosts.stdout }}"
@@ -86,7 +86,7 @@
       register: fstab
     - name: set fact fstab
       set_fact:
-        results_logs: '{{ results_logs|combine({"fstab": " ".join(fstab.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"fstab": "%%".join(fstab.stdout_lines)|quote}) }}'
     - name: write /etc/fstab backup
       debug:
         msg: "{{ fstab.stdout }}"
@@ -100,7 +100,7 @@
       register: lvsdisplay
     - name: set fact
       set_fact:
-        results_logs: '{{ results_logs|combine({"lvsdisplay": " ".join(lvsdisplay.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"lvsdisplay": "%%".join(lvsdisplay.stdout_lines)|quote}) }}'
     - name: dump lvsdisplay output
       debug:
         msg: "{{ lvsdsiplay.stdout }}"
@@ -114,7 +114,7 @@
       register: ifcfg
     - name: set ifconfig fact
       set_fact:
-        results_logs: '{{ results_logs|combine({"ifconfig": " ".join(ifcfg.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"ifconfig": "%%".join(ifcfg.stdout_lines)|quote}) }}'
     - name: write ifconfig data
       debug:
         msg: "{{ ifcfg.stdout_lines }}"
@@ -127,7 +127,7 @@
       register: crit_processes
     - name: set critical processes fact
       set_fact:
-        results_logs: '{{ results_logs|combine({"java": " ".join(crit_processes)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"java": "%%".join(crit_processes)|quote}) }}'
     - name: dump critical java processes to log
       debug:
         msg: "Some critical proccess are running in background. Check ps -ef.\n{{ crit_processes.stdout }}"
@@ -142,7 +142,7 @@
       register: log_messages_events_error
     - name: set log messages fact
       set_fact:
-        results_logs: '{{ results_logs|combine({"log_messages_errors": " ".join(log_messages_events_error.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"log_messages_errors": "%%".join(log_messages_events_error.stdout_lines)|quote}) }}'
     - name: count /var/log/messages errors and warnings
       shell: "cat /var/log/messages | sed -n -e '/error/p' -e'/warn/p'|wc -l"
       ignore_errors: true
@@ -162,7 +162,7 @@
       register: log_dmesg_crit_events
     - name: set fact log dmesg
       set_fact:
-        results_logs: '{{ results_logs|combine({"dmesg": " ".join(log_dmesg_crit_events.stdout_lines)|quote}) }}'
+        results_logs: '{{ results_logs|combine({"dmesg": "%%".join(log_dmesg_crit_events.stdout_lines)|quote}) }}'
     - name: log critical alerts
       debug:
         msg: "{{ ' '.join(log_dmesg_crit_events.stdout_lines) }}"

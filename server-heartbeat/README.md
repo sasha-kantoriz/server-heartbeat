@@ -15,4 +15,6 @@ Role contains stages:
 
 Remote logs directories, ansible server logs dir, enabled package manager repos, excluded packages variables can be edited at `vars/main.yml`
 
+All new line symbols(`\n`) in output for each entry in CSV files are replaced with `%%`
+
 Role invokation: `bin/ansible <playbook.yml> -i <hosts> [--tags <comma separated tags list>]`
