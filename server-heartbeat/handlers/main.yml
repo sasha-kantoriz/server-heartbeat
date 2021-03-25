@@ -1,2 +1,4 @@
 ---
 # handlers file for server-heartbeat
+- name: reboot
+  reboot:
