@@ -24,6 +24,8 @@
     - name: write uptime info
       debug:
         msg: "{{ uptime.stdout }}"
+  tags:
+    - logs
 - name: mounted FS data
   block:
     - name: retrive df file systems data output
@@ -35,6 +37,8 @@
     - name: write df output
       debug:
         msg: "{{ df_total.stdout }}"
+  tags:
+    - logs
 - name: retrieve Mem/CPU info
   block:
     - name: read Mem/CPU data
@@ -46,6 +50,8 @@
     - name: dump CPU data
       debug:
         msg: "{{ cpu_total.stdout }}"
+  tags:
+    - logs
 - name:  log ifcfg network scripts
   block:
     - name: read ifcfg network scripts
@@ -58,6 +64,8 @@
     - name: write ufcfg network scripts
       debug:
         msg: "{{ ifcfg_net_scripts.stdout }}"
+  tags:
+    - logs
 - name: backup /etc/hosts file
   block:
     - name: read /etc/hosts file
@@ -69,6 +77,8 @@
     - name: write /etc/hosts backup
       debug:
         msg: "{{ hosts.stdout }}"
+  tags:
+    - logs
 - name: retrieve fstab data
   block:
     - name: read /etc/fstab data
@@ -80,6 +90,8 @@
     - name: write /etc/fstab backup
       debug:
         msg: "{{ fstab.stdout }}"
+  tags:
+    - logs
 - name: retrieve lvsdisplay data
   block:
     - name: get lvsdisplay output
@@ -92,6 +104,8 @@
     - name: dump lvsdisplay output
       debug:
         msg: "{{ lvsdsiplay.stdout }}"
+  tags:
+    - logs
 - name: get ifconfig data
   block:
     - name: retrieve ifconfig output
@@ -104,6 +118,8 @@
     - name: write ifconfig data
       debug:
         msg: "{{ ifcfg.stdout_lines }}"
+  tags:
+    - logs
 - name: list java processes
   block:
     - name: check Java processes
@@ -116,6 +132,8 @@
       debug:
         msg: "Some critical proccess are running in background. Check ps -ef.\n{{ crit_processes.stdout }}"
       when: "{{ crit_processes.stdout_lines|length!=0 }}"
+  tags:
+    - logs
 - name: list warnings and errors /var/log/messages
   block:
     - name: read /var/log/messages
@@ -135,6 +153,8 @@
     - name: write crtitical alerts log message
       debug:
         msg: "{{ log_messages_events_error.stdout }}"
+  tags:
+    - logs
 - name: read dmesg errors and warnings
   block:
     - name: verify errors/warnings presence in /var/log/dmesg
@@ -151,6 +171,10 @@
       debug:
         msg: "No critical alerts found in /var/log/dmesg"
       when: log_dmesg_crit_events.stdout_lines|length==0
+  tags:
+    - logs
 - name: write logs collection finished
   debug:
     msg: "###################################### PRECHECK LOGS COLLECTED  #########################################################"
+  tags:
+    - logs
