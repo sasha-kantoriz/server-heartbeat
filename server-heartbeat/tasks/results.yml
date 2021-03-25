@@ -29,6 +29,7 @@
   fetch:
     src: "{{ item }}"
     dest: "{{ ansible_server_logs_path }}/"
+    flat: yes
   with_items:
       - "{{ remote_logs_path }}/{{ prefix }}-pre.csv"
       - "{{ remote_logs_path }}/{{ prefix }}-post.csv"
