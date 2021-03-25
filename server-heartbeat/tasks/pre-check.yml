@@ -13,7 +13,7 @@
       register: hostname
     - name: set fact [hostname]
       set_fact:
-        results_pre: '{{ results_pre | combine({"hostname-pre": " ".join(hostname.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre | combine({"hostname": " ".join(hostname.stdout_lines)|quote }) }}'
     - name: write hostname
       debug:
         msg: "{{ hostname.stdout }}"
@@ -26,10 +26,24 @@
       register: uname
     - name: set uname fact
       set_fact:
-        results_pre: '{{ results_pre|combine({"uname-pre": " ".join(uname.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre|combine({"uname": " ".join(uname.stdout_lines)|quote }) }}'
     - name: dump uname output
       debug:
         msg: "{{ uname.stdout }}"
+  tags:
+    - pre
+- name: get sysconfig networking info
+  block:
+    - name: read network cfg file
+      shell:  "cat /etc/sysconfig/network"
+      ignore_errors: true
+      register: syscfg_net
+    - name: set fact syscfg network
+      set_fact:
+        results_pre: '{{ results_pre|combine({"syscfg_net": " ".join(syscfg_net.stdout_lines)|quote }) }}'
+    - name: write syscfg network data
+      debug:
+        msg: "{{ syscfg_net.stdout }}"
   tags:
     - pre
 - name: check routes info
@@ -39,7 +53,7 @@
       register: route
     - name: set fact routes
       set_fact:
-        results_pre: '{{ results_pre|combine({"route-pre": " ".join(route.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre|combine({"route": " ".join(route.stdout_lines)|quote }) }}'
     - name: log routes info
       debug:
         msg: "{{ route.stdout }}"
@@ -52,24 +66,10 @@
       register: df
     - name: set df fact
       set_fact:
-        results_pre: '{{ results_pre|combine({"df-pre": " ".join(df.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre|combine({"df": " ".join(df.stdout_lines)|quote }) }}'
     - name: dump df output
       debug:
         msg: "{{ df.stdout }}"
-  tags:
-    - pre
-- name: get sysconfig networking info
-  block:
-    - name: read network cfg file
-      shell:  "cat /etc/sysconfig/network"
-      ignore_errors: true
-      register: syscfg_net
-    - name: set fact syscfg network
-      set_fact:
-        results_pre: '{{ results_pre|combine({"syscfg_net-pre": " ".join(syscfg_net.stdout_lines)|quote }) }}'
-    - name: write syscfg network data
-      debug:
-        msg: "{{ syscfg_net.stdout }}"
   tags:
     - pre
 - name: retrieve mounts info
@@ -79,7 +79,7 @@
       register: mounts
     - name: set fact mounts
       set_fact:
-        results_pre: '{{ results_pre|combine({"mounts-pre": " ".join(mounts.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre|combine({"mounts": " ".join(mounts.stdout_lines)|quote }) }}'
     - name: dump mounts info
       debug:
         msg: "{{ mounts.stdout }}"
@@ -92,7 +92,7 @@
       register: fdisk
     - name: set fact fdisk
       set_fact:
-        results_pre: '{{ results_pre|combine({"fdisk-pre": " ".join(fdisk.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre|combine({"fdisk": " ".join(fdisk.stdout_lines)|quote }) }}'
     - name: write fdisk output
       debug:
         msg: "{{ fdisk.stdout }}"
@@ -105,7 +105,7 @@
       register: lsblk
     - name: set fact lsblk
       set_fact:
-        results_pre: '{{ results_pre|combine({"lsblk-pre": " ".join(lsblk.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre|combine({"lsblk": " ".join(lsblk.stdout_lines)|quote }) }}'
     - name: dump lsblk output
       debug:
         msg: "{{ lsblk.stdout }}"
@@ -118,7 +118,7 @@
       register: lvs
     - name: set fact lvs
       set_fact:
-        results_pre: '{{ results_pre|combine({"lvs-pre": " ".join(lvs.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre|combine({"lvs": " ".join(lvs.stdout_lines)|quote }) }}'
     - name: write lvs info
       debug:
         msg: "{{ lvs.stdout }}"
@@ -132,7 +132,7 @@
       register: iptables
     - name: set fact iptables
       set_fact:
-        results_pre: '{{ results_pre|combine({"iptables-pre": " ".join(iptables.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre|combine({"iptables": " ".join(iptables.stdout_lines)|quote }) }}'
     - name: write iptables service status
       debug:
         msg: "{{ iptables.stdout }}"
@@ -160,7 +160,7 @@
       register: sssd
     - name: set fact sssd
       set_fact:
-        results_pre: '{{ results_pre|combine({"sssd-pre": " ".join(sssd.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre|combine({"sssd": " ".join(sssd.stdout_lines)|quote }) }}'
     - name: write sysctl sssd service status
       debug:
         msg: "{{ sssd.stdout }}"
@@ -173,7 +173,7 @@
       register: ipa
     - name: set fact ip address
       set_fact:
-        results_pre: '{{ results_pre|combine({"ipaddress-pre": " ".join(ipa.stdout_lines)|quote }) }}'
+        results_pre: '{{ results_pre|combine({"ipaddress": " ".join(ipa.stdout_lines)|quote }) }}'
     - name: dump ip addr info
       debug:
         msg: "{{ ipa.stdout }}"
