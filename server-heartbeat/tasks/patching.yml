@@ -19,7 +19,8 @@
 - name: update katello package
   yum:
     name: 'http://satellite6/pub/katello-ca-consumer-latest.noarch.rpm'
-    state: lates
+    state: latest
+  ignore_errors: true
   when: "ansible_distribution == 'RedHat'"
   tags:
     - patching
