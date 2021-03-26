@@ -5,7 +5,7 @@
 - import_tasks: patching.yml
 - import_tasks: post-check.yml
 - import_tasks: logs.yml
-#- import_tasks: collect.yml
+- import_tasks: collect.yml
 - import_tasks: results.yml
 
 

@@ -27,8 +27,7 @@
   register: prev_logs
   delegate_to: localhost
   tags:
-    - fetch
-    - clear
+    - cleanup
 - name: Download logs
   fetch:
     src: "{{ item.path }}"

@@ -1,4 +1,5 @@
 ---
+
 - name: Clear remote logs folders
   file:
     dest: "{{ remote_logs_path }}/"
@@ -15,9 +16,23 @@
   tags:
     - setup_remote
     - setup
+- name: Make remote logs folders
+  file:
+    dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre"
+    state: directory
+  tags:
+    - setup_remote
+    - setup
+- name: Make remote logs folders
+  file:
+    dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post"
+    state: directory
+  tags:
+    - setup_remote
+    - setup
 - name: Make ansible server logs folder
   file:
-    dest: "{{ ansible_server_logs_path }}"
+    dest: "{{ ansible_server_logs_path }}/prev"
     state: directory
   delegate_to: localhost
   tags:

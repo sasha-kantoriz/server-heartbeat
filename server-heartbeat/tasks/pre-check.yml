@@ -1,11 +1,4 @@
 ---
-- name: initialize prechecks
-  block:
-    - name: begin precheck [PRE]
-      debug:
-        msg:  "######################################## TAKING PRECHECK LOGS ###########################################################"
-  tags:
-    - pre
 - name: verify hostname
   block:
     - name: read hostname [PRE]
@@ -15,8 +8,9 @@
       set_fact:
         results_pre: "{{ results_pre | combine({'hostname': hostname.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: write hostname
-      debug:
-        msg: "{{ hostname.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/hostname"
+        content: "{{ hostname.stdout }}"
   tags:
     - pre
 - name: distribution info
@@ -28,8 +22,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'uname': uname.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: dump uname output
-      debug:
-        msg: "{{ uname.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/uname"
+        content: "{{ uname.stdout }}"
   tags:
     - pre
 - name: get sysconfig networking info
@@ -42,8 +37,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'syscfg_net': syscfg_net.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: write syscfg network data
-      debug:
-        msg: "{{ syscfg_net.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/sys-network"
+        content: "{{ syscfg_net.stdout }}"
   tags:
     - pre
 - name: check routes info
@@ -55,8 +51,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'route': route.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: log routes info
-      debug:
-        msg: "{{ route.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/route"
+        content: "{{ route.stdout }}"
   tags:
     - pre
 - name: Find the disk utilization
@@ -68,8 +65,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'df': df.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: dump df output
-      debug:
-        msg: "{{ df.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/df"
+        content: "{{ df.stdout }}"
   tags:
     - pre
 - name: retrieve mounts info
@@ -81,8 +79,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'mounts': mounts.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: dump mounts info
-      debug:
-        msg: "{{ mounts.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/mount-l"
+        content: "{{ mounts.stdout }}"
   tags:
     - pre
 - name: get fdisks info
@@ -94,8 +93,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'fdisk': fdisk.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: write fdisk output
-      debug:
-        msg: "{{ fdisk.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/fdisk-l"
+        content: "{{ fdisk.stdout }}"
   tags:
     - pre
 - name: retrieve lsblk info
@@ -107,8 +107,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'lsblk': lsblk.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: dump lsblk output
-      debug:
-        msg: "{{ lsblk.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lsblk"
+        content: "{{ lsblk.stdout }}"
   tags:
     - pre
 - name: retrieve lvs info
@@ -120,8 +121,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'lvs': lvs.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: write lvs info
-      debug:
-        msg: "{{ lvs.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/lvs"
+        content: "{{ lvs.stdout }}"
   tags:
     - pre
 - name: read iptables service status
@@ -134,8 +136,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'iptables': iptables.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: write iptables service status
-      debug:
-        msg: "{{ iptables.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/iptables"
+        content: "{{ iptables.stdout }}"
   tags:
     - pre
 - name: read firewalld service status
@@ -148,8 +151,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'firewalld': firewalld.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: write firewlld service status
-      debug:
-        msg: "{{ firewalld.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/firewall"
+        content: "{{ firewalld.stdout }}"
   tags:
     - pre
 - name: read sssd service status
@@ -162,8 +166,9 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'sssd': sssd.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: write sysctl sssd service status
-      debug:
-        msg: "{{ sssd.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/sssd"
+        content: "{{ sssd.stdout }}"
   tags:
     - pre
 - name: get internet interfaces info
@@ -175,7 +180,8 @@
       set_fact:
         results_pre: "{{ results_pre|combine({'ipaddress': ipa.stdout.replace(\"'\", '\"')|quote }) }}"
     - name: dump ip addr info
-      debug:
-        msg: "{{ ipa.stdout_lines }}"
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/ips"
+        content: "{{ ipa.stdout }}"
   tags:
     - pre
