@@ -33,7 +33,7 @@ packages_to_exclude:
   - postgresql-client
   - postgresql-server
   - subversion
-services_to_halt:
+services_to_monitor:
   - mysql
   - mysqld
   - oracle
