@@ -32,8 +32,18 @@
     - setup
 - name: Make ansible server logs folder
   file:
+    dest: "{{ ansible_server_logs_path }}"
+    state: directory
+    mode: '777'
+  delegate_to: localhost
+  tags:
+    - setup_local
+    - setup
+- name: Make ansible server logs folder
+  file:
     dest: "{{ ansible_server_logs_path }}/prev"
     state: directory
+    mode: '777'
   delegate_to: localhost
   tags:
     - setup_local
