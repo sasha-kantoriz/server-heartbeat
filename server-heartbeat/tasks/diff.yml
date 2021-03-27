@@ -1,0 +1,19 @@
+---
+- name: find all remote log files
+  find:
+    path: "{{ remote_logs_path }}/{{ ansible_host }}/pre"
+  register: logs
+  tags:
+    - diff
+- name: compare PRE stage to POST stage logs
+  shell: "diff {{ item.path }} {{ item.path | regex_replace('/pre/', '/post/') }}"
+  register: diff
+  with_items: "{{ logs.files }}"
+  ignore_errors: true
+  tags:
+    - diff
+- debug:
+    msg: "{{ item.stdout_lines }}"
+  with_items: "{{ diff.results }}"
+  tags:
+    - diff

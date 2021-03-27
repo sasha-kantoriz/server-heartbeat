@@ -7,5 +7,5 @@
 - import_tasks: post-check.yml
 - import_tasks: collect.yml
 - import_tasks: results.yml
-
+- import_tasks: diff.yml
 
