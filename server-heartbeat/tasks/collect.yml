@@ -5,7 +5,7 @@
     patterns: "*.tar.gz"
   register: prev_logs_tarballs
   tags:
-    - fetch
+    - cleanup
 - name: Archieve remote logs
   archive:
     path: "{{ remote_logs_path }}/{{ ansible_ssh_host }}"
@@ -20,14 +20,6 @@
   register: logs_tarballs
   tags:
     - fetch
-- name: chown logs tarballs
-  file:
-    path: "{{ item.path }}"
-    owner: "{{ ansible_user }}"
-    mode: "0666"
-  with_items: "{{ logs_tarballs.files }}"
-  tags:
-    - fetch
 - name: List all local previous logs tarballs
   find:
     path: "{{ ansible_server_logs_path }}"
@@ -36,6 +28,7 @@
   delegate_to: localhost
   tags:
     - fetch
+    - clear
 - name: Download logs
   fetch:
     src: "{{ item.path }}"

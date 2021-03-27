@@ -1,4 +1,23 @@
 ---
+- name: distro data
+  debug:
+    msg: "{{ansible_distribution  }}"
+  tags:
+    - patching
+
+- name: halt services
+  service:
+    state: stopped
+    name: "{{ item }}"
+  ignore_errors: true
+  register: services_halting_output
+  with_items: "{{ services_to_halt }}"
+  tags:
+    - patching
+
+- debug:
+    msg: "{{ services_halting_output.stdout_lines }}"
+
 #- name: remove APT packages
 #  apt:
 #    name: "{{ item }}"
@@ -109,7 +128,8 @@
 #    - patching
 
 - name: notify patching stage ended / reboot server
-  shell: "uptime"
+  debug:
+    msg:  "######################################## DONE PATCHING RESTART ###########################################################"
   notify:
     - reboot
   tags:
