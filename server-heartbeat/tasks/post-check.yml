@@ -149,7 +149,7 @@
       register: firewalld_post
     - name: set fact firewalld
       set_fact:
-        results_post: "{{ results_post|combine({'firewalld': firewalld.stdout.replace(\"'\",'\"')|quote }) }}"
+        results_post: "{{ results_post|combine({'firewalld': firewalld_post.stdout.replace(\"'\",'\"')|quote }) }}"
     - name: write firewlld service status
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/firewall"
