@@ -16,12 +16,6 @@
     content: "{{ ','.join(results_post.keys()|list) }}\n{{ ','.join(results_post.values()|map('string')|list) }}"
   tags:
     - csv
-- name: Dump logs CSV
-  copy:
-    dest: "{{ remote_logs_path }}/{{ prefix }}-logs.csv"
-    content: "{{ ','.join(results_logs.keys()|list) }}\n{{ ','.join(results_logs.values()|map('string')|list) }}"
-  tags:
-    - csv
 
 - name: change log files permission
   file:
@@ -31,7 +25,6 @@
   with_items:
     - "{{ remote_logs_path }}/{{ prefix }}-pre.csv"
     - "{{ remote_logs_path }}/{{ prefix }}-post.csv"
-    - "{{ remote_logs_path }}/{{ prefix }}-logs.csv"
 
 - name: Download CSV logs
   fetch:
@@ -41,6 +34,5 @@
   with_items:
       - "{{ remote_logs_path }}/{{ prefix }}-pre.csv"
       - "{{ remote_logs_path }}/{{ prefix }}-post.csv"
-      - "{{ remote_logs_path }}/{{ prefix }}-logs.csv"
   tags:
     - csv
