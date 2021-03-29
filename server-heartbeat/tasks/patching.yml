@@ -1,13 +1,4 @@
 ---
-#- name: remove APT packages
-#  apt:
-#    name: "{{ item }}"
-#    state: absent
-#  ignore_errors: true
-#  with_items: "{{ packages_to_exclude }}"
-#  when: "ansible_distribution == 'Ubuntu'"
-#  tags:
-#    - patching
 
 ### Katello
 - name: update katello package
@@ -18,99 +9,71 @@
   when: "ansible_distribution == 'RedHat'"
   tags:
     - patching
-###
 
-- name: get YUM package manager repos
-  shell: "yum repolist"
-  register: yum_repos
-  when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
-  tags:
-    - patching
-- set_fact:
-    startreposid: "{{ yum_repos.stdout_lines|select('match', 'repo id*')|list|first }}"
-  when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
-  tags:
-    - patching
-- set_fact:
-    listrepos: "{{ yum_repos.stdout_lines[yum_repos.stdout_lines.index(startreposid)+1:-1] }}"
-  when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
-  tags:
-    - patching
-- name: disable YUM package manager repos
-  yum:
-    disablerepo: "{{ item.split('/')[ 0] }}"
-  ignore_errors: true
-  with_items: "{{ listrepos }}"
-  when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
-  tags:
-    - patching
-- name: enable YUM repos
-  yum:
-    enablerepo: "{{ item }}"
-  ignore_errors: true
-  with_items: "{{ rhel_enabled_repos }}"
+- name: update RHEL OS & check wether reboot is required
+  block:
+    - name: run yum update
+      yum:
+        name: "*"
+        disablerepo: "*"
+        enablerepo: "{{ rhel_enabled_repos }}"
+        exclude: "{{ packages_to_exclude }}"
+        state: latest
+    - name: check to see if server needs a reboot
+      command: needs-restarting -r
+      register: rhel_restart_required
+      ignore_errors: yes
   when: "ansible_distribution == 'RedHat'"
   tags:
     - patching
-- name: update OS
-  yum:
-    name: "*"
-    exclude: "{{ packages_to_exclude }}"
-    state: latest
-  ignore_errors: true
-  when: "ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'"
+
+- name: update CentOS OS & check wether reboot is required
+  block:
+    - name: run yum update
+      yum:
+        name: "*"
+        disablerepo: "*"
+        enablerepo: "{{ centos_enabled_repos }}"
+        exclude: "{{ packages_to_exclude }}"
+        state: latest
+    - name: check to see if server needs a reboot
+      command: needs-restarting -r
+      register: centos_restart_required
+      ignore_errors: yes
+  when: "ansible_distribution == 'CentOS'"
   tags:
     - patching
 
-- name: get Zypper package manager repos
-  shell: "zypper repos --uri"
-  register: zypper_repos
-  when: "'openSUSE' in ansible_distribution"
+- name: update SUSE OS & check wether reboot is required
+  block:
+    - name: run zypper update
+      zypper:
+        name: "*"
+        state: latest
+    - name: Check if a reboot is needed on all SUSE/OpenSUSE/SLES based servers
+      register: suse_reboot_required_file
+      stat: path=/boot/do_purge_kernels get_md5=no
+  when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
   tags:
     - patching
-- set_fact:
-    startreposid: "{{ zypper_repos.stdout_lines|select('match', '---*')|list|first }}"
-  when: "'openSUSE' in ansible_distribution"
-  tags:
-    - patching
-- set_fact:
-    listrepos: "{{ zypper_repos.stdout_lines[zypper_repos.stdout_lines.index(startreposid)+1:] }}"
-  when: "'openSUSE' in ansible_distribution"
-  tags:
-    - patching
-- name: disable Zypper package manager repos
-  zypper_repository:
-    name: "{{ item.split()[2] }}"
-    enabled: no
-    repo: "{{ item.split()[-1] }}"
-  ignore_errors: true
-  with_items: "{{ listrepos }}"
-  when: "'openSUSE' in ansible_distribution"
-  tags:
-    - patching
-- name: enable Zypper repos
-  zypper_repository:
-    name: "{{ item.name }}"
-    repo: "{{ item.uri }}"
-    state: present
-    enabled: yes
-  with_items: "{{ suse_enabled_repos }}"
-  when: "'openSUSE' in ansible_distribution"
-  tags:
-    - patching
-#- name: remove Zypper packages
-#  zypper:
-#    name: "{{ item }}"
-#    state: absent
-#  with_items: "{{ packages_to_exclude }}"
-#  ignore_errors: true
-#  when: "'openSUSE' in ansible_distribution"
-#  tags:
-#    - patching
 
-- name: notify patching stage ended / reboot server
+- name: update Ubuntu OS & check wether reboot is required
+  block:
+    - name: run apt update
+      apt:
+        name: "*"
+        state: latest
+    - name: Check if a reboot is needed on all SUSE/OpenSUSE/SLES based servers
+      register: ubuntu_reboot_required_file
+      stat: path=/var/run/reboot-required get_md5=no
+  when: "'Ubuntu' in ansible_distribution"
+  tags:
+    - patching
+
+- name: notify patching stage ended / reboot server if necessary
   shell: "uptime"
+  when: suse_reboot_required_file.stat.exists or ubuntu_reboot_required_file.stat.exists or centos_restart_required.rc==1 or rhel_restart_required==1
   notify:
-    - reboot
+      - reboot
   tags:
-    - patching
+      - patching
