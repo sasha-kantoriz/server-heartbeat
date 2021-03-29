@@ -4,9 +4,8 @@ ansible_server_logs_path: /data-export
 remote_logs_path: /data-export
 rhel_enabled_repos:
   - rhel-7-server-e4s-rpms
-suse_enabled_repos:
-  - name: repo-oss
-    uri: 'http://download.opensuse.org/distribution/leap/15.2/repo/oss/'
+centos_enabled_repos:
+  - base
 packages_to_exclude:
   - oracle
   - php

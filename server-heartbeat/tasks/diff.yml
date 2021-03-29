@@ -13,7 +13,7 @@
   tags:
     - diff
 - debug:
-    msg: "{{ item.stdout_lines }} {{ item.cmd }}"
+    msg: "{{ item.stdout_lines }}"
   with_items: "{{ diff.results }}"
   tags:
     - diff
