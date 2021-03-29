@@ -19,7 +19,7 @@
         enablerepo: "{{ rhel_enabled_repos }}"
         exclude: "{{ packages_to_exclude }}"
         state: latest
-    - name: check to see if server needs a reboot
+    - name: Check if a reboot is needed on all RHEL based servers
       command: needs-restarting -r
       register: rhel_restart_required
       ignore_errors: yes
@@ -36,7 +36,7 @@
         enablerepo: "{{ centos_enabled_repos }}"
         exclude: "{{ packages_to_exclude }}"
         state: latest
-    - name: check to see if server needs a reboot
+    - name: Check if a reboot is needed on all CentOS based servers
       command: needs-restarting -r
       register: centos_restart_required
       ignore_errors: yes
@@ -52,7 +52,9 @@
         state: latest
     - name: Check if a reboot is needed on all SUSE/OpenSUSE/SLES based servers
       register: suse_reboot_required_file
-      stat: path=/boot/do_purge_kernels get_md5=no
+      stat:
+        path: /boot/do_purge_kernels
+        get_md5: no
   when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
   tags:
     - patching
@@ -63,16 +65,42 @@
       apt:
         name: "*"
         state: latest
-    - name: Check if a reboot is needed on all SUSE/OpenSUSE/SLES based servers
+    - name: Check if a reboot is needed on all Ubuntu based servers
       register: ubuntu_reboot_required_file
-      stat: path=/var/run/reboot-required get_md5=no
+      stat:
+        path: /var/run/reboot-required
+        get_md5: no
   when: "'Ubuntu' in ansible_distribution"
   tags:
     - patching
 
-- name: notify patching stage ended / reboot server if necessary
+- debug:
+    msg: "{{ suse_reboot_required_file }}"
+
+- name: notify patching stage ended / reboot SUSE/SLES servers if necessary
   shell: "uptime"
-  when: suse_reboot_required_file.stat.exists or ubuntu_reboot_required_file.stat.exists or centos_restart_required.rc==1 or rhel_restart_required==1
+  when: "('SUSE' in ansible_distribution or 'SLES' in ansible_distribution) and suse_reboot_required_file.stat.exists"
+  notify:
+      - reboot
+  tags:
+      - patching
+- name: notify patching stage ended / reboot Ubuntu servers if necessary
+  shell: "uptime"
+  when: "'Ubuntu' in ansible_distribution and ubuntu_reboot_required_file.stat.exists"
+  notify:
+      - reboot
+  tags:
+      - patching
+- name: notify patching stage ended / reboot CentOS servers if necessary
+  shell: "uptime"
+  when: "ansible_distribution == 'CentOS' and centos_restart_required.rc==1"
+  notify:
+      - reboot
+  tags:
+      - patching
+- name: notify patching stage ended / reboot RHEL servers if necessary
+  shell: "uptime"
+  when: "ansible_distribution == 'RedHat' and rhel_restart_required==1"
   notify:
       - reboot
   tags:
