@@ -13,6 +13,7 @@
       register: subscription_status
     - debug:
         msg: "{{ subscription_status.stdout_lines }}"
+  ignore_errors: true
   when: "ansible_distribution == 'RedHat'"
   tags:
     - logs
