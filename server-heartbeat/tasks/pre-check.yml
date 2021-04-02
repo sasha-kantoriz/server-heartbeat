@@ -156,6 +156,12 @@
       shell: "service firewalld status"
       ignore_errors: true
       register: firewalld
+      when: "('SUSE' in ansible_distribution or 'SLES' in ansible_distribution) or ansible_distribution=='RedHat'"
+    - name: get iptables sysctl status [PRE]
+      shell: "service ufw status"
+      ignore_errors: true
+      register: firewalld
+      when: "ansible_distribution == 'Ubuntu'"
     - name: set fact firewalld
       set_fact:
         results_pre: "{{ results_pre|combine({'firewalld': firewalld.stdout.replace(\"'\", '\"')|quote }) }}"
