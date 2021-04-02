@@ -119,6 +119,10 @@
       register: multipath_post
     - set_fact:
         results_post: "{{ results_post|combine({'multipath': multipath_post.stdout.replace(\"'\", '\"')|quote }) }}"
+    - name: write multipath data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_host }}/post/mulipath"
+        content: "{{ multipath_post.stdout }}"
   tags:
     - pre
 - name: read syscfg network file

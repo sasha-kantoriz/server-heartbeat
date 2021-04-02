@@ -119,6 +119,10 @@
       register: multipath
     - set_fact:
         results_pre: "{{ results_pre|combine({'multipath': multipath.stdout.replace(\"'\", '\"')|quote }) }}"
+    - name: write multipath data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_host }}/pre/mulipath"
+        content: "{{ multipath.stdout }}"
   tags:
     - pre
 - name: get sysconfig networking info
