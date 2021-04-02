@@ -158,6 +158,15 @@
       when: "crit_processes.stdout_lines|length!=0"
   tags:
     - logs
+- name: list oracle processes
+  block:
+    - name: checking pmon process for oracle data base
+      shell: "ps -ef | grep -i pmon"
+      register: oracle_pmon
+    - debug:
+        msg: "{{ oracle_pmon.stdout_lines }}"
+  tags:
+    - logs
 - name: list running services
   block:
     - name: list services that up
