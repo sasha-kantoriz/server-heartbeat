@@ -126,6 +126,15 @@
         content: "{{ lvs_post.stdout }}"
   tags:
     - post
+- name: get multipath output
+  block:
+    - name: retrieve multipath data
+      shell: "multipath -ll"
+      register: multipath_post
+    - set_fact:
+        results_post: "{{ results_post|combine({'multipath': multipath_post.stdout.replace(\"'\", '\"')|quote }) }}"
+  tags:
+    - pre
 - name: see itables systemctl services status
   block:
     - name: check iptables service enablence\\ [POST]

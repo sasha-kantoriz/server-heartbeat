@@ -126,6 +126,15 @@
         content: "{{ lvs.stdout }}"
   tags:
     - pre
+- name: get multipath output
+  block:
+    - name: retrieve multipath data
+      shell: "multipath -ll"
+      register: multipath
+    - set_fact:
+        results_pre: "{{ results_pre|combine({'multipath': multipath.stdout.replace(\"'\", '\"')|quote }) }}"
+  tags:
+    - pre
 - name: read iptables service status
   block:
     - name: get sysctl iptables services status [PRE]
