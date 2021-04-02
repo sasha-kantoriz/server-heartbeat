@@ -115,6 +115,7 @@
   block:
     - name: retrieve multipath data
       shell: "multipath -ll"
+      ignore_errors: true
       register: multipath
     - set_fact:
         results_pre: "{{ results_pre|combine({'multipath': multipath.stdout.replace(\"'\", '\"')|quote }) }}"

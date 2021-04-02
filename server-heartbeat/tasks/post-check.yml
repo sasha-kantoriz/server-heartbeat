@@ -115,6 +115,7 @@
   block:
     - name: retrieve multipath data
       shell: "multipath -ll"
+      ignore_errors: true
       register: multipath_post
     - set_fact:
         results_post: "{{ results_post|combine({'multipath': multipath_post.stdout.replace(\"'\", '\"')|quote }) }}"
