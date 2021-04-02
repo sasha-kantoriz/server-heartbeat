@@ -27,21 +27,6 @@
         content: "{{ uname_post.stdout }}"
   tags:
     - post
-- name: read syscfg network file
-  block:
-    - name: get network syscfg [POST]
-      shell: "cat /etc/sysconfig/network"
-      ignore_errors: true
-      register: syscfg_net_post
-    - name: set fact syscfg
-      set_fact:
-        results_post: "{{ results_post|combine({'syscfg_net': syscfg_net_post.stdout.replace(\"'\",'\"')|quote }) }}"
-    - name: write syscfg network data
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sys-network"
-        content: "{{ syscfg_net_post.stdout }}"
-  tags:
-    - post
 - name: retrieve routes info
   block:
     - name: get route output [POST]
@@ -126,6 +111,66 @@
         content: "{{ lvs_post.stdout }}"
   tags:
     - post
+- name: get multipath output
+  block:
+    - name: retrieve multipath data
+      shell: "multipath -ll"
+      ignore_errors: true
+      register: multipath_post
+    - set_fact:
+        results_post: "{{ results_post|combine({'multipath': multipath_post.stdout.replace(\"'\", '\"')|quote }) }}"
+    - name: write multipath data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_host }}/post/mulipath"
+        content: "{{ multipath_post.stdout }}"
+  tags:
+    - pre
+- name: read syscfg network file
+  block:
+    - name: get network syscfg RedHat [POST]
+      shell: "cat /etc/sysconfig/network"
+      ignore_errors: true
+      register: syscfg_net_post_rhel
+      when: "ansible_distribution == 'RedHat'"
+    - name: read network cfg file Ubuntu [PRE]
+      shell: "cat /etc/netplan/01-netcfg.yaml"
+      ignore_errors: true
+      register: syscfg_net_ubuntu
+      when: "ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '18'"
+    - name: read network cfg files SUSE/SLES [PRE]
+      shell: "cat /etc/networks"
+      ignore_errors: true
+      register: syscfg_net_suse
+      when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
+    - name: set fact syscfg
+      set_fact:
+        results_post: "{{ results_post|combine({'syscfg_net': syscfg_net_post_rhel.stdout.replace(\"'\",'\"')|quote }) }}"
+      when: "ansible_distribution == 'RedHat'"
+    - name: set fact syscfg
+      set_fact:
+        results_post: "{{ results_post|combine({'syscfg_net': syscfg_net_post_ubuntu.stdout.replace(\"'\",'\"')|quote }) }}"
+      when: "ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '18'"
+    - name: set fact syscfg
+      set_fact:
+        results_post: "{{ results_post|combine({'syscfg_net': syscfg_net_post_suse.stdout.replace(\"'\",'\"')|quote }) }}"
+      when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
+    - name: write syscfg network data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sys-network"
+        content: "{{ syscfg_net_post_rhel.stdout }}"
+      when: "ansible_distribution == 'RedHat'"
+    - name: write syscfg network data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sys-network"
+        content: "{{ syscfg_net_post_ubuntu.stdout }}"
+      when: "ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '18'"
+    - name: write syscfg network data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sys-network"
+        content: "{{ syscfg_net_post_suse.stdout }}"
+      when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
+  tags:
+    - post
 - name: see itables systemctl services status
   block:
     - name: check iptables service enablence\\ [POST]
@@ -146,14 +191,31 @@
     - name: check status firewalld service [POST]
       shell: "service firewalld status"
       ignore_errors: true
-      register: firewalld_post
+      register: firewalld_post_rpm
+      when: "('SUSE' in ansible_distribution or 'SLES' in ansible_distribution) or ansible_distribution=='RedHat'"
+    - name: get ufw sysctl status [PRE]
+      shell: "service ufw status"
+      ignore_errors: true
+      register: firewalld_post_deb
+      when: "ansible_distribution == 'Ubuntu'"
     - name: set fact firewalld
       set_fact:
-        results_post: "{{ results_post|combine({'firewalld': firewalld_post.stdout.replace(\"'\",'\"')|quote }) }}"
+        results_post: "{{ results_post|combine({'firewalld': firewalld_post_rpm.stdout.replace(\"'\",'\"')|quote }) }}"
+      when: "('SUSE' in ansible_distribution or 'SLES' in ansible_distribution) or ansible_distribution=='RedHat'"
+    - name: set fact firewalld
+      set_fact:
+        results_post: "{{ results_post|combine({'firewalld': firewalld_post_deb.stdout.replace(\"'\",'\"')|quote }) }}"
+      when: "ansible_distribution == 'Ubuntu'"
     - name: write firewlld service status
       copy:
         dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/firewall"
-        content: "{{ firewalld_post.stdout }}"
+        content: "{{ firewalld_post_rpm.stdout }}"
+      when: "('SUSE' in ansible_distribution or 'SLES' in ansible_distribution) or ansible_distribution=='RedHat'"
+    - name: write firewlld service status
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/firewall"
+        content: "{{ firewalld_post_deb.stdout }}"
+      when: "ansible_distribution == 'Ubuntu'"
   tags:
     - post
 - name: fetch sssd systemctl status service

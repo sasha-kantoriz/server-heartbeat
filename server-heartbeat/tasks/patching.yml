@@ -10,6 +10,14 @@
   tags:
     - patching
 
+### SUSE subscription
+- name: subscribe to SUSE/SLES
+  shell: "SUSEConnect -r 60sv384vw31vv"
+  ignore_errors: true
+  when: "('SUSE' in ansible_distribution or 'SLES' in ansible_distribution) and suse_subscription.rc!=0"
+  tags:
+    - patching
+
 - name: update RHEL OS & check wether reboot is required
   block:
     - name: run yum update
