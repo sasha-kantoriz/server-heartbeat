@@ -27,21 +27,6 @@
         content: "{{ uname.stdout }}"
   tags:
     - pre
-- name: get sysconfig networking info
-  block:
-    - name: read network cfg file [PRE]
-      shell:  "cat /etc/sysconfig/network"
-      ignore_errors: true
-      register: syscfg_net
-    - name: set fact syscfg network
-      set_fact:
-        results_pre: "{{ results_pre|combine({'syscfg_net': syscfg_net.stdout.replace(\"'\", '\"')|quote }) }}"
-    - name: write syscfg network data
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/sys-network"
-        content: "{{ syscfg_net.stdout }}"
-  tags:
-    - pre
 - name: check routes info
   block:
     - name: grab routes [PRE]
@@ -133,6 +118,32 @@
       register: multipath
     - set_fact:
         results_pre: "{{ results_pre|combine({'multipath': multipath.stdout.replace(\"'\", '\"')|quote }) }}"
+  tags:
+    - pre
+- name: get sysconfig networking info
+  block:
+    - name: read network cfg file RedHat [PRE]
+      shell:  "cat /etc/sysconfig/network"
+      ignore_errors: true
+      register: syscfg_net
+      when: "ansible_distribution == 'RedHat'"
+    - name: read network cfg file Ubuntu [PRE]
+      shell: "cat /etc/netplan/01-netcfg.yaml"
+      ignore_errors: true
+      register: syscfg_net
+      when: "ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '18'"
+    - name: read network cfg files SUSE/SLES [PRE]
+      shell: "cat /etc/networks"
+      ignore_errors: true
+      register: syscfg_net
+      when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
+    - name: set fact syscfg network
+      set_fact:
+        results_pre: "{{ results_pre|combine({'syscfg_net': syscfg_net.stdout.replace(\"'\", '\"')|quote }) }}"
+    - name: write syscfg network data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/pre/sys-network"
+        content: "{{ syscfg_net.stdout }}"
   tags:
     - pre
 - name: read iptables service status

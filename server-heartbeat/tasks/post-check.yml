@@ -27,21 +27,6 @@
         content: "{{ uname_post.stdout }}"
   tags:
     - post
-- name: read syscfg network file
-  block:
-    - name: get network syscfg [POST]
-      shell: "cat /etc/sysconfig/network"
-      ignore_errors: true
-      register: syscfg_net_post
-    - name: set fact syscfg
-      set_fact:
-        results_post: "{{ results_post|combine({'syscfg_net': syscfg_net_post.stdout.replace(\"'\",'\"')|quote }) }}"
-    - name: write syscfg network data
-      copy:
-        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sys-network"
-        content: "{{ syscfg_net_post.stdout }}"
-  tags:
-    - post
 - name: retrieve routes info
   block:
     - name: get route output [POST]
@@ -135,6 +120,32 @@
         results_post: "{{ results_post|combine({'multipath': multipath_post.stdout.replace(\"'\", '\"')|quote }) }}"
   tags:
     - pre
+- name: read syscfg network file
+  block:
+    - name: get network syscfg RedHat [POST]
+      shell: "cat /etc/sysconfig/network"
+      ignore_errors: true
+      register: syscfg_net_post
+      when: "ansible_distribution == 'RedHat'"
+    - name: read network cfg file Ubuntu [PRE]
+      shell: "cat /etc/netplan/01-netcfg.yaml"
+      ignore_errors: true
+      register: syscfg_net
+      when: "ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '18'"
+    - name: read network cfg files SUSE/SLES [PRE]
+      shell: "cat /etc/networks"
+      ignore_errors: true
+      register: syscfg_net
+      when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
+    - name: set fact syscfg
+      set_fact:
+        results_post: "{{ results_post|combine({'syscfg_net': syscfg_net_post.stdout.replace(\"'\",'\"')|quote }) }}"
+    - name: write syscfg network data
+      copy:
+        dest: "{{ remote_logs_path }}/{{ ansible_ssh_host }}/post/sys-network"
+        content: "{{ syscfg_net_post.stdout }}"
+  tags:
+    - post
 - name: see itables systemctl services status
   block:
     - name: check iptables service enablence\\ [POST]
