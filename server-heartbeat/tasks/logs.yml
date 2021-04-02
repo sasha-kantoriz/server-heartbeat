@@ -167,6 +167,15 @@
         msg: "{{ oracle_pmon.stdout_lines }}"
   tags:
     - logs
+- name: list network sockets/ports of running services
+  block:
+    - name: get networking mapping
+      shell: "netstat -tulpn"
+      register: services_ports
+    - debug:
+        msg: "{{ services_ports.stdout_lines }}"
+  tags:
+    - logs
 - name: list running services
   block:
     - name: list services that up
