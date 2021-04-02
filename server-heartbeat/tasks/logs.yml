@@ -93,21 +93,30 @@
     - name: read ifcfg network scripts RedHat
       shell: "cat /etc/sysconfig/network-scripts/ifcfg-*"
       ignore_errors: true
-      register: ifcfg_net_scripts
+      register: ifcfg_net_scripts_rhel
       when: "ansible_distribution == 'RedHat'"
     - name: read ifcfg network scripts Ubuntu
       shell: "cat /etc/network/interfaces"
       ignore_errors: true
-      register: syscfg_net
+      register: ifcfg_net_scripts_ubuntu
       when: "ansible_distribution == 'Ubuntu'"
     - name: read network cfg files SUSE/SLES [PRE]
       shell: "cat /etc/sysconfig/network/ifcfg-*"
       ignore_errors: true
-      register: syscfg_net
+      register: ifcfg_net_scripts_suse
       when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
     - name: write ifcfg network scripts
       debug:
-        msg: "{{ ifcfg_net_scripts.stdout_lines }}"
+        msg: "{{ ifcfg_net_scripts_rhel.stdout_lines }}"
+      when: "ansible_distribution == 'RedHat'"
+    - name: write ifcfg network scripts
+      debug:
+        msg: "{{ ifcfg_net_scripts_ubuntu.stdout_lines }}"
+      when: "ansible_distribution == 'Ubuntu'"
+    - name: write ifcfg network scripts
+      debug:
+        msg: "{{ ifcfg_net_scripts_suse.stdout_lines }}"
+      when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
   tags:
     - logs
 - name: backup /etc/hosts file
@@ -125,16 +134,21 @@
     - name: retrieve ifconfig output
       shell: "ifconfig -a"
       ignore_errors: true
-      register: ifcfg
+      register: ifcfg_rpm
       when: "('SUSE' in ansible_distribution or 'SLES' in ansible_distribution) or ansible_distribution=='RedHat'"
     - name: retrieve ifconfig output
       shell: "/sbin/ifconfig -a"
       ignore_errors: true
-      register: ifcfg
+      register: ifcfg_deb
       when: "ansible_distribution == 'Ubuntu'"
     - name: write ifconfig data
       debug:
-        msg: "{{ ifcfg.stdout_lines }}"
+        msg: "{{ ifcfg_rpm.stdout_lines }}"
+      when: "('SUSE' in ansible_distribution or 'SLES' in ansible_distribution) or ansible_distribution=='RedHat'"
+    - name: write ifconfig data
+      debug:
+        msg: "{{ ifcfg_deb.stdout_lines }}"
+      when: "ansible_distribution == 'Ubuntu'"
   tags:
     - logs
 - name: retrieve Mem/CPU info
@@ -161,7 +175,8 @@
 - name: list oracle processes
   block:
     - name: checking pmon process for oracle data base
-      shell: "ps -ef | grep -i pmon"
+      shell: "ps -ef | grep -i pmon | grep -v grep"
+      ignore_errors: true
       register: oracle_pmon
     - debug:
         msg: "{{ oracle_pmon.stdout_lines }}"
@@ -170,7 +185,8 @@
 - name: list network sockets/ports of running services
   block:
     - name: get networking mapping
-      shell: "netstat -tulpn"
+      shell: "ss -tulpn"
+      ignore_errors: true
       register: services_ports
     - debug:
         msg: "{{ services_ports.stdout_lines }}"
