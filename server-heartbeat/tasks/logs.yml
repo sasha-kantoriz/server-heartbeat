@@ -18,7 +18,7 @@
       when: "ansible_distribution == 'RedHat'"
     - name: get SUSE/SLES subscription status
       shell: "SUSEConnect -s"
-      register: suse_suscription
+      register: suse_subscription
       when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
       ignore_errors: true
     - debug:
