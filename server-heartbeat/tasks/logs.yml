@@ -90,10 +90,22 @@
     - logs
 - name:  log ifcfg network scripts
   block:
-    - name: read ifcfg network scripts
+    - name: read ifcfg network scripts RedHat
       shell: "cat /etc/sysconfig/network-scripts/ifcfg-*"
       ignore_errors: true
       register: ifcfg_net_scripts
+      when: "ansible_distribution == 'RedHat'"
+    - name: read ifcfg network scripts Ubuntu
+      shell: "cat /etc/network/interfaces"
+      ignore_errors: true
+      register: syscfg_net
+      when: "ansible_distribution == 'Ubuntu'"
+    - name: read network cfg files SUSE/SLES [PRE]
+      shell: "cat /etc/sysconfig/network/ifcfg-*"
+      ignore_errors: true
+      register: syscfg_net
+      when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
+    - name: write ifcfg network scripts
       debug:
         msg: "{{ ifcfg_net_scripts.stdout_lines }}"
   tags:
