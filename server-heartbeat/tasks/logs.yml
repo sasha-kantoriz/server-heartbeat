@@ -10,11 +10,20 @@
   block:
     - name: get RHEL subscription status
       shell: "subscription-manager status"
-      register: subscription_status
+      register: rhel_subscription
+      ignore_errors: true
+      when: "ansible_distribution == 'RedHat'"
     - debug:
-        msg: "{{ subscription_status.stdout_lines }}"
-  ignore_errors: true
-  when: "ansible_distribution == 'RedHat'"
+        msg: "{{ rhel_subscription.stdout_lines }}"
+      when: "ansible_distribution == 'RedHat'"
+    - name: get SUSE/SLES subscription status
+      shell: "SUSEConnect -s"
+      register: suse_suscription
+      when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
+      ignore_errors: true
+    - debug:
+        msg: "{{ suse_subscription.stdout_lines }}"
+      when: "'SUSE' in ansible_distribution or 'SLES' in ansible_distribution"
   tags:
     - logs
 
@@ -85,7 +94,6 @@
       shell: "cat /etc/sysconfig/network-scripts/ifcfg-*"
       ignore_errors: true
       register: ifcfg_net_scripts
-    - name: write ufcfg network scripts
       debug:
         msg: "{{ ifcfg_net_scripts.stdout_lines }}"
   tags:
