@@ -35,7 +35,7 @@
     dest: "{{ ansible_server_logs_path }}"
     state: directory
     mode: '777'
-  delegate_to: localhost
+  connection: local
   tags:
     - setup_local
     - setup
@@ -44,7 +44,7 @@
     dest: "{{ ansible_server_logs_path }}/prev"
     state: directory
     mode: '777'
-  delegate_to: localhost
+  connection: local
   tags:
     - setup_local
     - setup

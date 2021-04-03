@@ -82,9 +82,6 @@
   tags:
     - patching
 
-- debug:
-    msg: "{{ suse_reboot_required_file }}"
-
 - name: notify patching stage ended / reboot SUSE/SLES servers if necessary
   shell: "uptime"
   when: "('SUSE' in ansible_distribution or 'SLES' in ansible_distribution) and suse_reboot_required_file.stat.exists"
