@@ -132,12 +132,12 @@
       ignore_errors: true
       register: syscfg_net_post_rhel
       when: "ansible_distribution == 'RedHat'"
-    - name: read network cfg file Ubuntu [PRE]
+    - name: read network cfg file Ubuntu [POST]
       shell: "cat /etc/netplan/01-netcfg.yaml"
       ignore_errors: true
       register: syscfg_net_ubuntu
       when: "ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '18'"
-    - name: read network cfg files SUSE/SLES [PRE]
+    - name: read network cfg files SUSE/SLES [POST]
       shell: "cat /etc/networks"
       ignore_errors: true
       register: syscfg_net_suse
@@ -193,7 +193,7 @@
       ignore_errors: true
       register: firewalld_post_rpm
       when: "('SUSE' in ansible_distribution or 'SLES' in ansible_distribution) or ansible_distribution=='RedHat'"
-    - name: get ufw sysctl status [PRE]
+    - name: get ufw sysctl status [POST]
       shell: "service ufw status"
       ignore_errors: true
       register: firewalld_post_deb
