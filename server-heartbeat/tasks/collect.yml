@@ -33,7 +33,7 @@
     path: "{{ ansible_server_logs_path }}"
     patterns: "*.tar.gz"
   register: prev_logs
-  delegate_to: localhost
+  connection: local
   tags:
     - fetch
 - name: Download logs
@@ -47,7 +47,8 @@
 - name: Move previous logs tarballs
   command: "mv {{ item.path }} {{ ansible_server_logs_path }}/prev/"
   with_items: "{{ prev_logs.files }}"
-  delegate_to: localhost
+  ignore_errors: true
+  connection: local
   tags:
     - fetch
     - clear
@@ -56,7 +57,7 @@
     path: "{{ ansible_server_logs_path }}"
     patterns: "*.tar.gz"
   register: logs
-  delegate_to: localhost
+  connection: local
   tags:
     - fetch
     - unarchive
@@ -65,7 +66,7 @@
     src: "{{ item.path }}"
     dest: "{{ ansible_server_logs_path }}"
   with_items: "{{ logs.files }}"
-  delegate_to: localhost
+  connection: local
   tags:
     - fetch
     - unarchive
@@ -81,7 +82,7 @@
   file:
     path: "{{ ansible_server_logs_path }}/prev"
     state: absent
-  delegate_to: localhost
+  connection: local
   tags:
     - cleanup
 - name: Clear prev remote logs

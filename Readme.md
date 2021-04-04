@@ -15,6 +15,14 @@ Role contains stages:
 - __Diff__: 
 Remote logs directories, ansible server logs dir, enabled package manager repos, excluded packages variables can be edited at `vars/main.yml`
 
-All new line symbols(`\n`) in output for each entry in CSV files are replaced with `%%` 
 
-Role invokation: `bin/ansible <playbook.yml> -i <hosts> [--tags <comma separated tags list>]`
+Docker container invocation:
+- docker build -t server-heartbeat .
+- docker run -v `pwd`/hosts:/home/ansible-runner/hosts -v ~/.ssh/ssh-key:/home/ansible-runner/key -v `pwd`/data-export/:/data-export/ server-heartbeat:latest bash -c 'eval `ssh-agent`; ssh-add ~/key; ansible-playbook playbook.yml -i hosts'
+
+SSH-Key should be world readable.
+
+Optionaly specify vars file as volume file, with `-v vars.yml:/home/ansible-runner/roles/role/vars/main.yml` example to extend/override can be found in `server-heartbeat/vars/main.yml`
+
+Role invokation: 
+- `bin/ansible <playbook.yml> -i <hosts> [--tags <comma separated tags list>]`
